@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DW Web Solutions — Custom Websites & AI Tools for Local Business</title>
+<meta name="description" content="Custom websites, digital order catalogs, and AI workflow integration for small local businesses. Built to spec.">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root{
+    --charcoal:#14171A;
+    --charcoal-2:#0F1214;
+    --steel:#1E2429;
+    --steel-line:#3A434A;
+    --blueprint:#0F3550;
+    --blueprint-2:#123f5e;
+    --spark:#F2A93B;
+    --spark-dim:#B87F2A;
+    --paper:#ECEAE2;
+    --mute:#8A949C;
+  }
+
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+
+  body{
+    background-color:var(--charcoal);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .font-display{ font-family:'Archivo',sans-serif; }
+  .font-mono{ font-family:'IBM Plex Mono',monospace; }
+
+  /* blueprint grid background */
+  .blueprint-grid{
+    background-image:
+      linear-gradient(rgba(242,169,59,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(242,169,59,0.06) 1px, transparent 1px);
+    background-size:36px 36px;
+  }
+  .blueprint-grid-fine{
+    background-image:
+      linear-gradient(rgba(140,150,160,0.05) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(140,150,160,0.05) 1px, transparent 1px);
+    background-size:10px 10px;
+  }
+
+  /* corner registration / crop marks */
+  .crop-marks{ position:relative; }
+  .crop-marks::before,
+  .crop-marks::after{
+    content:"";
+    position:absolute;
+    width:14px; height:14px;
+    border-color:var(--spark);
+    opacity:0.55;
+  }
+  .crop-marks::before{
+    top:-1px; left:-1px;
+    border-top:2px solid var(--spark);
+    border-left:2px solid var(--spark);
+  }
+  .crop-marks::after{
+    bottom:-1px; right:-1px;
+    border-bottom:2px solid var(--spark);
+    border-right:2px solid var(--spark);
+  }
+
+  /* dashed cut lines between sections */
+  .cut-line{
+    position:relative;
+    border-top:1px dashed var(--steel-line);
+  }
+  .cut-line::before{
+    content:"✂";
+    position:absolute;
+    top:-9px; left:24px;
+    background:var(--charcoal);
+    color:var(--mute);
+    font-size:12px;
+    padding:0 8px;
+    letter-spacing:0.05em;
+  }
+
+  .ticket-num{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.08em;
+    color:var(--spark);
+  }
+
+  .spec-label{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    color:var(--mute);
+    text-transform:uppercase;
+  }
+
+  .spark-btn{
+    background:var(--spark);
+    color:var(--charcoal-2);
+    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
+    box-shadow:0 0 0 0 rgba(242,169,59,0);
+  }
+  .spark-btn:hover{
+    transform:translateY(-2px);
+    background:#f5b754;
+    box-shadow:0 8px 24px -6px rgba(242,169,59,0.45);
+  }
+  .spark-btn:active{ transform:translateY(0); }
+
+  .ghost-btn{
+    border:1px solid var(--steel-line);
+    color:var(--paper);
+    transition:border-color .15s ease, color .15s ease, background .15s ease;
+  }
+  .ghost-btn:hover{
+    border-color:var(--spark);
+    color:var(--spark);
+    background:rgba(242,169,59,0.06);
+  }
+
+  .job-card{
+    background:var(--steel);
+    border:1px solid var(--steel-line);
+    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
+  }
+  .job-card:hover{
+    transform:translateY(-4px);
+    border-color:var(--spark-dim);
+    box-shadow:0 20px 40px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(242,169,59,0.15);
+  }
+
+  .tier-card{
+    background:var(--steel);
+    border:1px solid var(--steel-line);
+  }
+  .tier-card.featured{
+    border:1px solid var(--spark);
+    background:linear-gradient(180deg, rgba(242,169,59,0.05), var(--steel) 30%);
+  }
+
+  .weld-dot::before{
+    content:"";
+    display:inline-block;
+    width:6px; height:6px;
+    border-radius:9999px;
+    background:var(--spark);
+    margin-right:10px;
+    flex-shrink:0;
+  }
+
+  input, select, textarea{
+    background:var(--charcoal-2);
+    border:1px solid var(--steel-line);
+    color:var(--paper);
+    transition:border-color .15s ease, box-shadow .15s ease;
+  }
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--spark);
+    box-shadow:0 0 0 3px rgba(242,169,59,0.15);
+  }
+  input::placeholder, textarea::placeholder{ color:#5c6670; }
+
+  /* stamp seal in hero */
+  .stamp{
+    border:2px solid var(--spark);
+    color:var(--spark);
+    transform:rotate(-8deg);
+    font-family:'IBM Plex Mono',monospace;
+    letter-spacing:0.15em;
+  }
+
+  /* scroll reveal */
+  .reveal{
+    opacity:0;
+    transform:translateY(24px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .reveal.in-view{
+    opacity:1;
+    transform:translateY(0);
+  }
+
+  /* mockup blueprint diagrams */
+  .mock-frame{
+    background:var(--charcoal-2);
+    border:1px solid var(--steel-line);
+  }
+  .mock-line{ background:rgba(236,234,226,0.14); }
+  .mock-block{
+    border:1px dashed rgba(242,169,59,0.35);
+    background:rgba(242,169,59,0.04);
+  }
+
+  ::selection{ background:var(--spark); color:var(--charcoal-2); }
+
+  a[href]:focus-visible, button:focus-visible{
+    outline:2px solid var(--spark);
+    outline-offset:2px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{ transition:none; opacity:1; transform:none; }
+    html{ scroll-behavior:auto; }
+  }
+
+  #mobile-menu{ transition:max-height .3s ease; overflow:hidden; }
+</style>
+</head>
+<body class="antialiased">
+
+<!-- NAV -->
+<header class="fixed top-0 left-0 right-0 z-50 bg-[var(--charcoal)]/90 backdrop-blur border-b border-[var(--steel-line)]">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 h-16 flex items-center justify-between">
+    <a href="#top" class="flex items-center gap-2">
+      <span class="font-display font-800 text-lg tracking-tight text-[var(--paper)]">DW<span class="text-[var(--spark)]">/</span>WEB</span>
+      <span class="hidden sm:inline spec-label">SOLUTIONS</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-8 font-mono text-[13px] tracking-wide text-[var(--mute)]">
+      <a href="#services" class="hover:text-[var(--spark)] transition-colors">01_SERVICES</a>
+      <a href="#work" class="hover:text-[var(--spark)] transition-colors">02_WORK</a>
+      <a href="#pricing" class="hover:text-[var(--spark)] transition-colors">03_PRICING</a>
+      <a href="#contact" class="hover:text-[var(--spark)] transition-colors">04_CONTACT</a>
+    </nav>
+    <a href="#contact" class="hidden md:inline-block spark-btn font-mono text-[13px] font-600 px-4 py-2 rounded">Request Consultation</a>
+    <button id="menu-btn" class="md:hidden text-[var(--paper)]" aria-label="Toggle menu" aria-expanded="false">
+      <svg id="menu-icon-open" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg id="menu-icon-close" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
+  </div>
+  <div id="mobile-menu" class="md:hidden max-h-0 border-t border-[var(--steel-line)]">
+    <nav class="flex flex-col px-5 py-4 gap-4 font-mono text-sm text-[var(--mute)]">
+      <a href="#services" class="mobile-link hover:text-[var(--spark)]">01_SERVICES</a>
+      <a href="#work" class="mobile-link hover:text-[var(--spark)]">02_WORK</a>
+      <a href="#pricing" class="mobile-link hover:text-[var(--spark)]">03_PRICING</a>
+      <a href="#contact" class="mobile-link hover:text-[var(--spark)]">04_CONTACT</a>
+      <a href="#contact" class="mobile-link spark-btn text-center rounded py-2 font-600 !text-[var(--charcoal-2)]">Request Consultation</a>
+    </nav>
+  </div>
+</header>
+
+<!-- HERO -->
+<section id="top" class="relative pt-32 pb-24 sm:pt-40 sm:pb-32 blueprint-grid overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 0%, rgba(15,53,80,0.55), transparent 55%);"></div>
+
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 relative">
+    <div class="crop-marks border border-[var(--steel-line)] bg-[var(--charcoal-2)]/60 p-6 sm:p-10 md:p-14 max-w-3xl">
+      <div class="flex items-center justify-between mb-6 flex-wrap gap-2">
+        <span class="ticket-num">WORK ORDER № DW-0001</span>
+        <span class="spec-label">STATUS: <span class="text-[var(--spark)]">OPEN FOR NEW BUILDS</span></span>
+      </div>
+
+      <h1 class="font-display font-900 text-4xl sm:text-5xl md:text-6xl leading-[1.05] tracking-tight">
+        Custom websites, <span class="text-[var(--spark)]">built to spec</span>,
+        for local businesses that are done waiting.
+      </h1>
+
+      <p class="mt-6 text-base sm:text-lg text-[var(--mute)] max-w-xl leading-relaxed">
+        Fast, modern sites and digital order catalogs — fitted precisely to how your business actually runs,
+        not a template you have to bend around. AI workflow tools included where they'll save you real hours.
+      </p>
+
+      <div class="mt-9 flex flex-col sm:flex-row gap-4">
+        <a href="#contact" class="spark-btn text-center font-mono font-600 text-sm px-7 py-4 rounded">
+          Request a Free Consultation
+        </a>
+        <a href="#work" class="ghost-btn text-center font-mono text-sm px-7 py-4 rounded">
+          See Sample Builds
+        </a>
+      </div>
+
+      <div class="mt-10 pt-6 border-t border-[var(--steel-line)] grid grid-cols-3 gap-4 font-mono text-[11px] text-[var(--mute)]">
+        <div><span class="spec-label block mb-1">TURNAROUND</span>1–3 weeks</div>
+        <div><span class="spec-label block mb-1">SCOPE</span>Web + Catalog + AI</div>
+        <div><span class="spec-label block mb-1">FIT FOR</span>Local & small biz</div>
+      </div>
+    </div>
+
+    <div class="hidden lg:block stamp absolute right-10 top-10 rounded-full w-28 h-28 flex items-center justify-center text-center text-[10px] font-700 leading-tight">
+      CERTIFIED<br>CUSTOM<br>BUILD
+    </div>
+  </div>
+</section>
+
+<div class="cut-line max-w-6xl mx-auto"></div>
+
+<!-- SERVICES -->
+<section id="services" class="py-20 sm:py-28 blueprint-grid-fine">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="reveal mb-14 max-w-2xl">
+      <span class="spec-label">SERVICES OFFERED</span>
+      <h2 class="font-display font-800 text-3xl sm:text-4xl mt-3 tracking-tight">Three jobs. One shop.</h2>
+      <p class="mt-4 text-[var(--mute)]">Each project runs through the same shop: scoped tight, built clean, handed off working.</p>
+    </div>
+
+    <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- Card 1 -->
+      <div class="reveal job-card rounded-lg p-7">
+        <div class="flex items-center justify-between mb-6">
+          <span class="ticket-num">JOB-01</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--spark)" stroke-width="1.6"><rect x="3" y="4" width="18" height="16" rx="1"/><path d="M3 9h18"/><path d="M8 4v5"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-xl mb-3">Custom Web Design</h3>
+        <p class="text-[var(--mute)] text-sm leading-relaxed mb-6">
+          A site designed around your actual business, not a page builder's idea of it. Fast-loading, mobile-first, and easy for you to update.
+        </p>
+        <div class="border-t border-[var(--steel-line)] pt-4 space-y-2 font-mono text-[11px]">
+          <div class="flex justify-between"><span class="spec-label">SCOPE</span><span class="text-[var(--paper)]">5–8 page site</span></div>
+          <div class="flex justify-between"><span class="spec-label">DELIVERABLE</span><span class="text-[var(--paper)]">Live + source</span></div>
+          <div class="flex justify-between"><span class="spec-label">TURNAROUND</span><span class="text-[var(--paper)]">7–10 days</span></div>
+        </div>
+      </div>
+
+      <!-- Card 2 -->
+      <div class="reveal job-card rounded-lg p-7" style="transition-delay:.08s">
+        <div class="flex items-center justify-between mb-6">
+          <span class="ticket-num">JOB-02</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--spark)" stroke-width="1.6"><rect x="4" y="3" width="16" height="18" rx="1"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-xl mb-3">Digital Catalogs & Order Tools</h3>
+        <p class="text-[var(--mute)] text-sm leading-relaxed mb-6">
+          Menus, price sheets, and product catalogs your customers can browse and order from directly — no more "call for pricing."
+        </p>
+        <div class="border-t border-[var(--steel-line)] pt-4 space-y-2 font-mono text-[11px]">
+          <div class="flex justify-between"><span class="spec-label">SCOPE</span><span class="text-[var(--paper)]">Catalog + checkout</span></div>
+          <div class="flex justify-between"><span class="spec-label">DELIVERABLE</span><span class="text-[var(--paper)]">Editable inventory</span></div>
+          <div class="flex justify-between"><span class="spec-label">TURNAROUND</span><span class="text-[var(--paper)]">10–14 days</span></div>
+        </div>
+      </div>
+
+      <!-- Card 3 -->
+      <div class="reveal job-card rounded-lg p-7" style="transition-delay:.16s">
+        <div class="flex items-center justify-between mb-6">
+          <span class="ticket-num">JOB-03</span>
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--spark)" stroke-width="1.6"><circle cx="12" cy="12" r="3"/><path d="M12 3v3M12 18v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M3 12h3M18 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></svg>
+        </div>
+        <h3 class="font-display font-700 text-xl mb-3">AI Setup & Workflow Integration</h3>
+        <p class="text-[var(--mute)] text-sm leading-relaxed mb-6">
+          Chat assistants, auto-replies, and booking flows wired into tools you already use — set up once, running quietly in the background.
+        </p>
+        <div class="border-t border-[var(--steel-line)] pt-4 space-y-2 font-mono text-[11px]">
+          <div class="flex justify-between"><span class="spec-label">SCOPE</span><span class="text-[var(--paper)]">1–2 workflows</span></div>
+          <div class="flex justify-between"><span class="spec-label">DELIVERABLE</span><span class="text-[var(--paper)]">Trained & tested</span></div>
+          <div class="flex justify-between"><span class="spec-label">TURNAROUND</span><span class="text-[var(--paper)]">5–7 days</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="cut-line max-w-6xl mx-auto"></div>
+
+<!-- PORTFOLIO / WORK -->
+<section id="work" class="py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="reveal mb-14 max-w-2xl">
+      <span class="spec-label">SAMPLE BUILD PLATES</span>
+      <h2 class="font-display font-800 text-3xl sm:text-4xl mt-3 tracking-tight">Layouts on the drafting table.</h2>
+      <p class="mt-4 text-[var(--mute)]">Rough plates of the kind of builds most local businesses need. Final sites are fitted to your brand, not this sketch.</p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+
+      <!-- Plate 1: Ecommerce -->
+      <div class="reveal job-card rounded-lg overflow-hidden">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+          <div class="flex gap-1.5 mb-1">
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+          </div>
+          <div class="h-3 w-1/3 mock-line rounded-sm"></div>
+          <div class="flex-1 grid grid-cols-3 gap-2 mt-2">
+            <div class="mock-block rounded-sm"></div>
+            <div class="mock-block rounded-sm"></div>
+            <div class="mock-block rounded-sm"></div>
+          </div>
+          <div class="h-2 w-1/4 mock-line rounded-sm mt-1 self-end"></div>
+        </div>
+        <div class="p-5 border-t border-[var(--steel-line)]">
+          <div class="ticket-num mb-1">PLATE-01</div>
+          <h3 class="font-display font-700 text-base">E-Commerce Storefront</h3>
+          <p class="text-[var(--mute)] text-xs mt-1">Product grid, cart, and checkout flow.</p>
+        </div>
+      </div>
+
+      <!-- Plate 2: Local Service -->
+      <div class="reveal job-card rounded-lg overflow-hidden" style="transition-delay:.08s">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+          <div class="flex gap-1.5 mb-1">
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+          </div>
+          <div class="h-8 mock-block rounded-sm"></div>
+          <div class="h-2 w-2/3 mock-line rounded-sm mt-2"></div>
+          <div class="h-2 w-1/2 mock-line rounded-sm"></div>
+          <div class="flex-1"></div>
+          <div class="h-6 w-1/3 mock-block rounded-sm self-start"></div>
+        </div>
+        <div class="p-5 border-t border-[var(--steel-line)]">
+          <div class="ticket-num mb-1">PLATE-02</div>
+          <h3 class="font-display font-700 text-base">Local Service Business</h3>
+          <p class="text-[var(--mute)] text-xs mt-1">Hero, service areas, and booking CTA.</p>
+        </div>
+      </div>
+
+      <!-- Plate 3: Digital Menu -->
+      <div class="reveal job-card rounded-lg overflow-hidden" style="transition-delay:.16s">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+          <div class="flex gap-1.5 mb-1">
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+            <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
+          </div>
+          <div class="h-3 w-1/2 mock-line rounded-sm"></div>
+          <div class="space-y-2 mt-2 flex-1">
+            <div class="flex justify-between items-center"><div class="h-2 w-1/3 mock-line rounded-sm"></div><div class="h-2 w-8 mock-line rounded-sm"></div></div>
+            <div class="flex justify-between items-center"><div class="h-2 w-2/5 mock-line rounded-sm"></div><div class="h-2 w-8 mock-line rounded-sm"></div></div>
+            <div class="flex justify-between items-center"><div class="h-2 w-1/4 mock-line rounded-sm"></div><div class="h-2 w-8 mock-line rounded-sm"></div></div>
+          </div>
+          <div class="h-6 w-2/5 mock-block rounded-sm self-end"></div>
+        </div>
+        <div class="p-5 border-t border-[var(--steel-line)]">
+          <div class="ticket-num mb-1">PLATE-03</div>
+          <h3 class="font-display font-700 text-base">Digital Menu / Catalog</h3>
+          <p class="text-[var(--mute)] text-xs mt-1">Item list, pricing, and direct ordering.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="cut-line max-w-6xl mx-auto"></div>
+
+<!-- PRICING -->
+<section id="pricing" class="py-20 sm:py-28 blueprint-grid-fine">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8">
+    <div class="reveal mb-14 max-w-2xl">
+      <span class="spec-label">BUILD TIERS</span>
+      <h2 class="font-display font-800 text-3xl sm:text-4xl mt-3 tracking-tight">Pick your spec.</h2>
+      <p class="mt-4 text-[var(--mute)]">Every tier ships a working site. Higher tiers add more moving parts.</p>
+    </div>
+
+    <div class="grid lg:grid-cols-3 gap-6 items-start">
+
+      <!-- Tier 1 -->
+      <div class="reveal tier-card rounded-lg p-8">
+        <span class="spec-label">TIER 01</span>
+        <h3 class="font-display font-700 text-2xl mt-2">Basic Starter</h3>
+        <p class="text-[var(--mute)] text-sm mt-2">A clean, professional site to get you found and looking legit.</p>
+        <div class="mt-6 font-display font-900 text-4xl">$650<span class="text-base font-mono font-400 text-[var(--mute)]"> one-time</span></div>
+        <ul class="mt-7 space-y-3 text-sm text-[var(--paper)]">
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Up to 4 pages</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Mobile-responsive design</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Contact form</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Basic SEO setup</li>
+        </ul>
+        <a href="#contact" class="ghost-btn block text-center font-mono text-sm px-6 py-3.5 rounded mt-8">Start This Build</a>
+      </div>
+
+      <!-- Tier 2 - Featured -->
+      <div class="reveal tier-card featured rounded-lg p-8 lg:-translate-y-3 relative" style="transition-delay:.08s">
+        <span class="absolute -top-3 right-6 bg-[var(--spark)] text-[var(--charcoal-2)] text-[10px] font-mono font-700 px-3 py-1 rounded-full tracking-wide">RECOMMENDED</span>
+        <span class="spec-label">TIER 02</span>
+        <h3 class="font-display font-700 text-2xl mt-2">Business Growth</h3>
+        <p class="text-[var(--mute)] text-sm mt-2">A full site plus the catalog or booking tools to actually take orders.</p>
+        <div class="mt-6 font-display font-900 text-4xl">$1,400<span class="text-base font-mono font-400 text-[var(--mute)]"> one-time</span></div>
+        <ul class="mt-7 space-y-3 text-sm text-[var(--paper)]">
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Up to 8 pages</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Digital catalog or menu</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Direct order / booking form</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>1 AI workflow (auto-reply or booking bot)</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>30 days post-launch support</li>
+        </ul>
+        <a href="#contact" class="spark-btn block text-center font-mono font-600 text-sm px-6 py-3.5 rounded mt-8">Start This Build</a>
+      </div>
+
+      <!-- Tier 3 -->
+      <div class="reveal tier-card rounded-lg p-8" style="transition-delay:.16s">
+        <span class="spec-label">TIER 03</span>
+        <h3 class="font-display font-700 text-2xl mt-2">Custom Solution</h3>
+        <p class="text-[var(--mute)] text-sm mt-2">Fully custom scope — built around a process nobody else has templated for.</p>
+        <div class="mt-6 font-display font-900 text-4xl">Quote<span class="text-base font-mono font-400 text-[var(--mute)]"> based on scope</span></div>
+        <ul class="mt-7 space-y-3 text-sm text-[var(--paper)]">
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Unlimited pages</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Custom catalog + order logic</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Multiple AI workflows</li>
+          <li class="flex items-start"><span class="weld-dot mt-1"></span>Ongoing maintenance available</li>
+        </ul>
+        <a href="#contact" class="ghost-btn block text-center font-mono text-sm px-6 py-3.5 rounded mt-8">Discuss This Build</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<div class="cut-line max-w-6xl mx-auto"></div>
+
+<!-- CONTACT -->
+<section id="contact" class="py-20 sm:py-28">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 grid lg:grid-cols-5 gap-10">
+
+    <div class="reveal lg:col-span-2">
+      <span class="spec-label">SUBMIT A WORK ORDER</span>
+      <h2 class="font-display font-800 text-3xl sm:text-4xl mt-3 tracking-tight">Let's spec out your build.</h2>
+      <p class="mt-4 text-[var(--mute)] text-sm leading-relaxed">
+        Tell me a bit about your business and what you need. I'll follow up with a free consultation
+        and a straight answer on timeline and cost — no templated sales pitch.
+      </p>
+
+      <div class="mt-8 space-y-4">
+        <a href="https://wa.me/15196136345" target="_blank" rel="noopener" class="flex items-center gap-3 job-card rounded-lg p-4 hover:border-[var(--spark-dim)]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--spark)"><path d="M12.04 2.003c-5.46 0-9.9 4.44-9.9 9.9 0 1.74.46 3.44 1.33 4.94L2 22l5.29-1.39a9.9 9.9 0 0 0 4.75 1.21h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.64-1.03-5.13-2.9-6.99a9.82 9.82 0 0 0-6.99-2.9Z"/></svg>
+          <div>
+            <div class="font-mono text-xs spec-label">WHATSAPP</div>
+            <div class="text-sm">519-613-6345</div>
+          </div>
+        </a>
+        <a href="mailto:wielerdiedrich@gmail.com" class="flex items-center gap-3 job-card rounded-lg p-4 hover:border-[var(--spark-dim)]">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--spark)" stroke-width="1.6"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+          <div>
+            <div class="font-mono text-xs spec-label">EMAIL</div>
+            <div class="text-sm">wielerdiedrich@gmail.com</div>
+          </div>
+        </a>
+      </div>
+    </div>
+
+    <div class="reveal lg:col-span-3 crop-marks job-card rounded-lg p-6 sm:p-8" style="transition-delay:.08s">
+      <form id="contact-form" class="space-y-5" novalidate>
+        <div class="flex items-center justify-between mb-2">
+          <span class="ticket-num">FORM № DW-CONTACT-01</span>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label for="name" class="spec-label block mb-2">Name</label>
+            <input id="name" name="name" type="text" required placeholder="Your full name" class="w-full rounded px-4 py-3 text-sm">
+          </div>
+          <div>
+            <label for="email" class="spec-label block mb-2">Email</label>
+            <input id="email" name="email" type="email" required placeholder="you@business.com" class="w-full rounded px-4 py-3 text-sm">
+          </div>
+        </div>
+
+        <div>
+          <label for="business-type" class="spec-label block mb-2">Business Type</label>
+          <select id="business-type" name="business-type" required class="w-full rounded px-4 py-3 text-sm">
+            <option value="" disabled selected>Select one</option>
+            <option>Restaurant / Food Service</option>
+            <option>Retail / Product-based</option>
+            <option>Trade / Contractor</option>
+            <option>Professional Service</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div>
+          <label for="details" class="spec-label block mb-2">Project Details</label>
+          <textarea id="details" name="details" required rows="4" placeholder="What are you looking to build? Current site, budget range, timeline — anything helps." class="w-full rounded px-4 py-3 text-sm resize-none"></textarea>
+        </div>
+
+        <button type="submit" class="spark-btn w-full font-mono font-600 text-sm px-6 py-4 rounded">
+          Submit Work Order
+        </button>
+
+        <p id="form-status" class="text-center text-sm font-mono hidden"></p>
+      </form>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="border-t border-[var(--steel-line)] py-10">
+  <div class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="font-display font-700 text-sm">DW<span class="text-[var(--spark)]">/</span>WEB SOLUTIONS</div>
+    <p class="spec-label text-center">FABRICATED BY HAND. CODED WITH PRECISION.</p>
+    <p class="text-[var(--mute)] text-xs font-mono">© 2026 DW Web Solutions</p>
+  </div>
+</footer>
+
+<script>
+  // Mobile menu
+  const menuBtn = document.getElementById('menu-btn');
+  const mobileMenu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('menu-icon-open');
+  const iconClose = document.getElementById('menu-icon-close');
+  let menuOpen = false;
+
+  function setMenu(open){
+    menuOpen = open;
+    mobileMenu.style.maxHeight = open ? mobileMenu.scrollHeight + 'px' : '0px';
+    iconOpen.classList.toggle('hidden', open);
+    iconClose.classList.toggle('hidden', !open);
+    menuBtn.setAttribute('aria-expanded', String(open));
+  }
+
+  menuBtn.addEventListener('click', () => setMenu(!menuOpen));
+  document.querySelectorAll('.mobile-link').forEach(link => {
+    link.addEventListener('click', () => setMenu(false));
+  });
+
+  // Scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting){
+        entry.target.classList.add('in-view');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.15 });
+  revealEls.forEach(el => observer.observe(el));
+
+  // Contact form (no backend wired up — replace with your endpoint/service)
+  const form = document.getElementById('contact-form');
+  const status = document.getElementById('form-status');
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    if (!form.checkValidity()){
+      form.reportValidity();
+      return;
+    }
+    status.textContent = '✓ WORK ORDER RECEIVED — I\'ll follow up within 1 business day.';
+    status.style.color = 'var(--spark)';
+    status.classList.remove('hidden');
+    form.reset();
+  });
+</script>
+
+</body>
+</html>
