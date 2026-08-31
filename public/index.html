@@ -10,212 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-
-<style>
-  :root{
-    --charcoal:#14171A;
-    --charcoal-2:#0F1214;
-    --steel:#1E2429;
-    --steel-line:#3A434A;
-    --blueprint:#0F3550;
-    --blueprint-2:#123f5e;
-    --spark:#F2A93B;
-    --spark-dim:#B87F2A;
-    --paper:#ECEAE2;
-    --mute:#8A949C;
-  }
-
-  *{ box-sizing:border-box; }
-  html{ scroll-behavior:smooth; }
-
-  body{
-    background-color:var(--charcoal);
-    color:var(--paper);
-    font-family:'Inter',sans-serif;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  .font-display{ font-family:'Archivo',sans-serif; }
-  .font-mono{ font-family:'IBM Plex Mono',monospace; }
-
-  /* blueprint grid background */
-  .blueprint-grid{
-    background-image:
-      linear-gradient(rgba(242,169,59,0.06) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(242,169,59,0.06) 1px, transparent 1px);
-    background-size:36px 36px;
-  }
-  .blueprint-grid-fine{
-    background-image:
-      linear-gradient(rgba(140,150,160,0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(140,150,160,0.05) 1px, transparent 1px);
-    background-size:10px 10px;
-  }
-
-  /* corner registration / crop marks */
-  .crop-marks{ position:relative; }
-  .crop-marks::before,
-  .crop-marks::after{
-    content:"";
-    position:absolute;
-    width:14px; height:14px;
-    border-color:var(--spark);
-    opacity:0.55;
-  }
-  .crop-marks::before{
-    top:-1px; left:-1px;
-    border-top:2px solid var(--spark);
-    border-left:2px solid var(--spark);
-  }
-  .crop-marks::after{
-    bottom:-1px; right:-1px;
-    border-bottom:2px solid var(--spark);
-    border-right:2px solid var(--spark);
-  }
-
-  /* dashed cut lines between sections */
-  .cut-line{
-    position:relative;
-    border-top:1px dashed var(--steel-line);
-  }
-  .cut-line::before{
-    content:"✂";
-    position:absolute;
-    top:-9px; left:24px;
-    background:var(--charcoal);
-    color:var(--mute);
-    font-size:12px;
-    padding:0 8px;
-    letter-spacing:0.05em;
-  }
-
-  .ticket-num{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.08em;
-    color:var(--spark);
-  }
-
-  .spec-label{
-    font-family:'IBM Plex Mono',monospace;
-    font-size:11px;
-    letter-spacing:0.1em;
-    color:var(--mute);
-    text-transform:uppercase;
-  }
-
-  .spark-btn{
-    background:var(--spark);
-    color:var(--charcoal-2);
-    transition:transform .15s ease, box-shadow .15s ease, background .15s ease;
-    box-shadow:0 0 0 0 rgba(242,169,59,0);
-  }
-  .spark-btn:hover{
-    transform:translateY(-2px);
-    background:#f5b754;
-    box-shadow:0 8px 24px -6px rgba(242,169,59,0.45);
-  }
-  .spark-btn:active{ transform:translateY(0); }
-
-  .ghost-btn{
-    border:1px solid var(--steel-line);
-    color:var(--paper);
-    transition:border-color .15s ease, color .15s ease, background .15s ease;
-  }
-  .ghost-btn:hover{
-    border-color:var(--spark);
-    color:var(--spark);
-    background:rgba(242,169,59,0.06);
-  }
-
-  .job-card{
-    background:var(--steel);
-    border:1px solid var(--steel-line);
-    transition:transform .2s ease, border-color .2s ease, box-shadow .2s ease;
-  }
-  .job-card:hover{
-    transform:translateY(-4px);
-    border-color:var(--spark-dim);
-    box-shadow:0 20px 40px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(242,169,59,0.15);
-  }
-
-  .tier-card{
-    background:var(--steel);
-    border:1px solid var(--steel-line);
-  }
-  .tier-card.featured{
-    border:1px solid var(--spark);
-    background:linear-gradient(180deg, rgba(242,169,59,0.05), var(--steel) 30%);
-  }
-
-  .weld-dot::before{
-    content:"";
-    display:inline-block;
-    width:6px; height:6px;
-    border-radius:9999px;
-    background:var(--spark);
-    margin-right:10px;
-    flex-shrink:0;
-  }
-
-  input, select, textarea{
-    background:var(--charcoal-2);
-    border:1px solid var(--steel-line);
-    color:var(--paper);
-    transition:border-color .15s ease, box-shadow .15s ease;
-  }
-  input:focus, select:focus, textarea:focus{
-    outline:none;
-    border-color:var(--spark);
-    box-shadow:0 0 0 3px rgba(242,169,59,0.15);
-  }
-  input::placeholder, textarea::placeholder{ color:#5c6670; }
-
-  /* stamp seal in hero */
-  .stamp{
-    border:2px solid var(--spark);
-    color:var(--spark);
-    transform:rotate(-8deg);
-    font-family:'IBM Plex Mono',monospace;
-    letter-spacing:0.15em;
-  }
-
-  /* scroll reveal */
-  .reveal{
-    opacity:0;
-    transform:translateY(24px);
-    transition:opacity .6s ease, transform .6s ease;
-  }
-  .reveal.in-view{
-    opacity:1;
-    transform:translateY(0);
-  }
-
-  /* mockup blueprint diagrams */
-  .mock-frame{
-    background:var(--charcoal-2);
-    border:1px solid var(--steel-line);
-  }
-  .mock-line{ background:rgba(236,234,226,0.14); }
-  .mock-block{
-    border:1px dashed rgba(242,169,59,0.35);
-    background:rgba(242,169,59,0.04);
-  }
-
-  ::selection{ background:var(--spark); color:var(--charcoal-2); }
-
-  a[href]:focus-visible, button:focus-visible{
-    outline:2px solid var(--spark);
-    outline-offset:2px;
-  }
-
-  @media (prefers-reduced-motion: reduce){
-    .reveal{ transition:none; opacity:1; transform:none; }
-    html{ scroll-behavior:auto; }
-  }
-
-  #mobile-menu{ transition:max-height .3s ease; overflow:hidden; }
-</style>
+<link rel="stylesheet" href="/css/brand.css">
 </head>
 <body class="antialiased">
 
@@ -251,6 +46,7 @@
 
 <!-- HERO -->
 <section id="top" class="relative pt-32 pb-24 sm:pt-40 sm:pb-32 blueprint-grid overflow-hidden">
+  <div data-slot="hero.background" class="absolute inset-0 pointer-events-none"></div>
   <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 0%, rgba(15,53,80,0.55), transparent 55%);"></div>
 
   <div class="max-w-6xl mx-auto px-5 sm:px-8 relative">
@@ -375,7 +171,7 @@
 
       <!-- Plate 1: Ecommerce -->
       <div class="reveal job-card rounded-lg overflow-hidden">
-        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2" data-slot="work.plate-01">
           <div class="flex gap-1.5 mb-1">
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
@@ -398,7 +194,7 @@
 
       <!-- Plate 2: Local Service -->
       <div class="reveal job-card rounded-lg overflow-hidden" style="transition-delay:.08s">
-        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2" data-slot="work.plate-02">
           <div class="flex gap-1.5 mb-1">
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
@@ -419,7 +215,7 @@
 
       <!-- Plate 3: Digital Menu -->
       <div class="reveal job-card rounded-lg overflow-hidden" style="transition-delay:.16s">
-        <div class="mock-frame h-56 p-4 flex flex-col gap-2">
+        <div class="mock-frame h-56 p-4 flex flex-col gap-2" data-slot="work.plate-03">
           <div class="flex gap-1.5 mb-1">
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
             <div class="w-2.5 h-2.5 rounded-full mock-line"></div>
@@ -643,6 +439,7 @@
     form.reset();
   });
 </script>
+<script src="/js/media-slots.js" defer></script>
 
 </body>
 </html>

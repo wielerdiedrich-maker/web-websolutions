@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin Login — DW Web Solutions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body class="login-body">
+  <div class="login-card crop-marks">
+    <div class="ticket-num mb-2">ACCESS № DW-ADMIN-01</div>
+    <div class="font-display font-800" style="font-size:22px;letter-spacing:-0.01em;">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:14px;font-weight:600;">ADMIN</span></div>
+    <p class="mute" style="margin:10px 0 24px;font-size:13px;">Private area. Authorized administrators only.</p>
+
+    <form id="login-form" novalidate>
+      <label class="spec-label" for="username">Username</label>
+      <input id="username" name="username" type="text" autocomplete="username" required>
+
+      <label class="spec-label" for="password" style="margin-top:14px;">Password</label>
+      <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+      <button type="submit" class="btn-primary" style="margin-top:22px;width:100%;">Sign In</button>
+      <p id="login-error" class="error-text" hidden></p>
+    </form>
+  </div>
+
+  <script src="/admin/assets/admin-shared.js"></script>
+  <script>
+    const form = document.getElementById('login-form');
+    const errorEl = document.getElementById('login-error');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      errorEl.hidden = true;
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+      try {
+        const res = await adminFetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Login failed.');
+        window.location.href = '/admin';
+      } catch (err) {
+        errorEl.textContent = err.message;
+        errorEl.hidden = false;
+      }
+    });
+  </script>
+</body>
+</html>
