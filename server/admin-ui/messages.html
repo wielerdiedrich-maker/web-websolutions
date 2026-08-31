@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Messages — DW Web Solutions Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:12px;font-weight:600;">ADMIN</span></div>
+
+    <div class="nav-section-label">Content</div>
+    <a class="nav-item" href="/admin"><span class="dot"></span>Media Library</a>
+    <div class="nav-item disabled"><span class="dot"></span>Products <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Services <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pages <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Blog Posts <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Testimonials <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Portfolio <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pricing <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">Site</div>
+    <a class="nav-item active" href="/admin/messages"><span class="dot"></span>Messages <span id="unread-badge" class="mute" style="margin-left:auto;font-size:10px;"></span></a>
+    <div class="nav-item disabled"><span class="dot"></span>Banners <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>SEO Settings <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="sidebar-footer">
+      <div class="mute" id="whoami" style="margin-bottom:10px;"></div>
+      <button class="btn-ghost" id="logout-btn" style="width:100%;">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Messages</h1>
+        <p class="mute" style="margin:4px 0 0;font-size:13px;">Work orders submitted through the site's contact form.</p>
+      </div>
+    </div>
+
+    <div id="messages-container"></div>
+  </main>
+</div>
+
+<!-- Message detail modal -->
+<div class="modal-overlay" id="detail-modal" hidden>
+  <div class="modal crop-marks" style="max-width:520px;">
+    <h3 id="detail-name"></h3>
+    <p style="margin-bottom:4px;" id="detail-meta"></p>
+    <p style="white-space:pre-wrap;color:var(--paper);margin-bottom:20px;" id="detail-body"></p>
+    <div class="modal-actions">
+      <button class="btn-danger" id="detail-delete-btn">Delete</button>
+      <button class="btn-ghost" id="detail-close-btn">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script src="/admin/assets/admin-shared.js"></script>
+<script src="/admin/assets/messages.js"></script>
+</body>
+</html>

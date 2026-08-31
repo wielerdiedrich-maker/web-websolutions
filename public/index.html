@@ -11,6 +11,18 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/brand.css">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "DW Web Solutions",
+  "description": "Custom websites, digital order catalogs, and AI workflow integration for small local businesses.",
+  "telephone": "+1-519-613-6345",
+  "email": "wielerdiedrich@gmail.com",
+  "areaServed": "Local & small business",
+  "priceRange": "$650-$1400+"
+}
+</script>
 </head>
 <body class="antialiased">
 
@@ -27,7 +39,13 @@
       <a href="#pricing" class="hover:text-[var(--spark)] transition-colors">03_PRICING</a>
       <a href="#contact" class="hover:text-[var(--spark)] transition-colors">04_CONTACT</a>
     </nav>
-    <a href="#contact" class="hidden md:inline-block spark-btn font-mono text-[13px] font-600 px-4 py-2 rounded">Request Consultation</a>
+    <div class="hidden md:flex items-center gap-4">
+      <a href="tel:+15196136345" class="font-mono text-[13px] text-[var(--mute)] hover:text-[var(--spark)] transition-colors">519-613-6345</a>
+      <a href="#contact" class="spark-btn font-mono text-[13px] font-600 px-4 py-2 rounded">Request Consultation</a>
+    </div>
+    <a href="tel:+15196136345" class="md:hidden text-[var(--spark)] mr-1" aria-label="Call 519-613-6345">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+    </a>
     <button id="menu-btn" class="md:hidden text-[var(--paper)]" aria-label="Toggle menu" aria-expanded="false">
       <svg id="menu-icon-open" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       <svg id="menu-icon-close" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -386,7 +404,13 @@
   <div class="max-w-6xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="font-display font-700 text-sm">DW<span class="text-[var(--spark)]">/</span>WEB SOLUTIONS</div>
     <p class="spec-label text-center">FABRICATED BY HAND. CODED WITH PRECISION.</p>
-    <p class="text-[var(--mute)] text-xs font-mono">© 2026 DW Web Solutions</p>
+    <div class="flex flex-col items-center sm:items-end gap-1 font-mono text-xs text-[var(--mute)]">
+      <div class="flex items-center gap-3">
+        <a href="tel:+15196136345" class="hover:text-[var(--spark)] transition-colors">519-613-6345</a>
+        <a href="mailto:wielerdiedrich@gmail.com" class="hover:text-[var(--spark)] transition-colors">wielerdiedrich@gmail.com</a>
+      </div>
+      <p>© 2026 DW Web Solutions</p>
+    </div>
   </div>
 </footer>
 
@@ -423,20 +447,46 @@
   }, { threshold: 0.15 });
   revealEls.forEach(el => observer.observe(el));
 
-  // Contact form (no backend wired up — replace with your endpoint/service)
+  // Contact form
   const form = document.getElementById('contact-form');
   const status = document.getElementById('form-status');
+  const submitBtn = form.querySelector('button[type="submit"]');
 
-  form.addEventListener('submit', (e) => {
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.checkValidity()){
       form.reportValidity();
       return;
     }
-    status.textContent = '✓ WORK ORDER RECEIVED — I\'ll follow up within 1 business day.';
-    status.style.color = 'var(--spark)';
-    status.classList.remove('hidden');
-    form.reset();
+
+    const payload = {
+      name: form.name.value,
+      email: form.email.value,
+      'business-type': form['business-type'].value,
+      details: form.details.value,
+    };
+
+    submitBtn.disabled = true;
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+      status.textContent = '✓ WORK ORDER RECEIVED — I\'ll follow up within 1 business day.';
+      status.style.color = 'var(--spark)';
+      status.classList.remove('hidden');
+      form.reset();
+    } catch (err) {
+      status.textContent = `✕ ${err.message}`;
+      status.style.color = '#E05B4F';
+      status.classList.remove('hidden');
+    } finally {
+      submitBtn.disabled = false;
+    }
   });
 </script>
 <script src="/js/media-slots.js" defer></script>

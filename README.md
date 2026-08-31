@@ -66,12 +66,22 @@ layer injected behind its content).
   header the browser won't attach cross-site, as CSRF mitigation.
 - Login attempts are rate-limited.
 
+## Contact form
+
+The public site's contact form posts to the public `POST /api/contact`
+endpoint, which validates and stores the submission in the `contact_messages`
+table (rate-limited to 10 submissions per 15 minutes per IP). Submissions are
+reviewed at `/admin/messages` — mark as read, reply by email, or delete.
+
+Business contact info (phone `519-613-6345`, email `wielerdiedrich@gmail.com`)
+is wired into the header, footer, contact section, and a `LocalBusiness`
+JSON-LD block in `public/index.html`.
+
 ## Extending this later
 
-The `media` table and `/api/media` routes are intentionally the only
-content type implemented so far. Products, services, pages, blog posts,
-testimonials, portfolio entries, pricing, banners, and SEO settings can each
-follow the same pattern: a table in `server/db.js`, a router in
-`server/routes/`, and a section in the admin sidebar (already stubbed as
-"coming soon" in `server/admin-ui/index.html`) — all can reference existing
-uploaded media by id rather than re-implementing upload handling.
+Products, services, pages, blog posts, testimonials, portfolio entries,
+pricing, and SEO settings can each follow the same pattern as `media` and
+`contact_messages`: a table in `server/db.js`, a router in `server/routes/`,
+and a section in the admin sidebar (already stubbed as "coming soon" in
+`server/admin-ui/index.html`) — all can reference existing uploaded media by
+id rather than re-implementing upload handling.
