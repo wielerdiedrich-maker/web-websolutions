@@ -1,10 +1,13 @@
 (function () {
   let mediaList = [];
+  let messagesList = [];
   let viewMode = 'grid';
   let activeMediaId = null;
+  let pendingDelete = null; // { type: 'media' | 'message', id }
 
   const el = (id) => document.getElementById(id);
   const container = el('media-container');
+  const messagesContainer = el('messages-container');
 
   // ---------- Toasts ----------
   function toast(message, type = 'info') {
@@ -154,6 +157,10 @@
       el('replace-input').value = '';
       openModal('replace-modal');
     } else if (action === 'delete') {
+      pendingDelete = { type: 'media', id: media.id };
+      el('delete-modal-title').textContent = 'Delete this file?';
+      el('delete-modal-text').textContent =
+        "This will permanently remove the file from storage. If it's currently published to a slot, it will disappear from the live site immediately.";
       openModal('delete-modal');
     }
   }
@@ -217,13 +224,22 @@
 
   el('delete-cancel-btn').addEventListener('click', () => closeModal('delete-modal'));
   el('delete-confirm-btn').addEventListener('click', async () => {
-    const res = await adminFetch(`/api/media/${activeMediaId}`, { method: 'DELETE' });
+    if (!pendingDelete) return;
+    const url = pendingDelete.type === 'message'
+      ? `/api/messages/${pendingDelete.id}`
+      : `/api/media/${pendingDelete.id}`;
+    const res = await adminFetch(url, { method: 'DELETE' });
     const data = await res.json();
     if (!res.ok) return toast(data.error || 'Could not delete.', 'error');
     toast('Deleted.', 'success');
     closeModal('delete-modal');
-    loadFolders();
-    loadMedia();
+    if (pendingDelete.type === 'message') {
+      loadMessages();
+    } else {
+      loadFolders();
+      loadMedia();
+    }
+    pendingDelete = null;
   });
 
   // ---------- Toolbar ----------
@@ -342,9 +358,84 @@
     xhr.send(formData);
   }
 
+  // ---------- Panel switching ----------
+  document.querySelectorAll('.nav-item[data-panel]').forEach((navItem) => {
+    navItem.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item[data-panel]').forEach((n) => n.classList.remove('active'));
+      navItem.classList.add('active');
+      const panel = navItem.dataset.panel;
+      el('panel-media').classList.toggle('hidden', panel !== 'media');
+      el('panel-messages').classList.toggle('hidden', panel !== 'messages');
+      if (panel === 'messages') loadMessages();
+    });
+  });
+
+  // ---------- Messages ----------
+  function renderMessages() {
+    if (!messagesList.length) {
+      messagesContainer.innerHTML = '<div class="empty-state">No messages yet. Submissions from the site\'s contact form will show up here.</div>';
+      return;
+    }
+    messagesContainer.innerHTML = messagesList.map((m) => `
+      <div class="media-card" style="flex-direction:column;margin-bottom:14px;${m.isRead ? '' : 'border-color:var(--spark-dim);'}">
+        <div class="media-info" style="padding:16px;gap:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:12px;flex-wrap:wrap;">
+            <div>
+              <div class="name" style="font-size:15px;">${escapeHtml(m.name)} ${m.isRead ? '' : '<span class="slot-badge" style="position:static;">NEW</span>'}</div>
+              <div class="mute" style="font-size:12px;margin-top:2px;">${escapeHtml(m.email)}${m.businessType ? ' · ' + escapeHtml(m.businessType) : ''}</div>
+            </div>
+            <div class="mute" style="font-size:11.5px;white-space:nowrap;">${formatDate(m.createdAt)}${m.emailSent ? '' : ' · <span title="No SMTP configured or send failed">email not sent</span>'}</div>
+          </div>
+          <p style="white-space:pre-wrap;font-size:13.5px;margin:6px 0 4px;">${escapeHtml(m.details)}</p>
+          <div class="media-actions" style="padding:0;margin-top:4px;">
+            <a class="btn-ghost" href="mailto:${encodeURIComponent(m.email)}" style="text-decoration:none;display:inline-block;">Reply by Email</a>
+            <button class="btn-ghost" data-action="toggle-read" data-id="${m.id}">${m.isRead ? 'Mark Unread' : 'Mark Read'}</button>
+            <button class="btn-danger" data-action="delete-message" data-id="${m.id}">Delete</button>
+          </div>
+        </div>
+      </div>`).join('');
+
+    messagesContainer.querySelectorAll('[data-action="toggle-read"]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        const msg = messagesList.find((x) => x.id === btn.dataset.id);
+        const res = await adminFetch(`/api/messages/${msg.id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ isRead: !msg.isRead }),
+        });
+        if (!res.ok) return toast('Could not update message.', 'error');
+        loadMessages();
+      });
+    });
+    messagesContainer.querySelectorAll('[data-action="delete-message"]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        pendingDelete = { type: 'message', id: btn.dataset.id };
+        el('delete-modal-title').textContent = 'Delete this message?';
+        el('delete-modal-text').textContent = 'This will permanently remove the submission. This cannot be undone.';
+        openModal('delete-modal');
+      });
+    });
+  }
+
+  function updateMessagesBadge() {
+    const unread = messagesList.filter((m) => !m.isRead).length;
+    const badge = el('messages-badge');
+    badge.hidden = unread === 0;
+    badge.textContent = unread;
+  }
+
+  async function loadMessages() {
+    const res = await adminFetch('/api/messages');
+    if (!res.ok) return toast('Could not load messages.', 'error');
+    messagesList = await res.json();
+    renderMessages();
+    updateMessagesBadge();
+  }
+
   // ---------- Init ----------
   checkSession().then(() => {
     loadFolders();
     loadMedia();
+    loadMessages();
   });
 })();

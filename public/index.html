@@ -342,6 +342,12 @@
           <span class="ticket-num">FORM № DW-CONTACT-01</span>
         </div>
 
+        <!-- Honeypot: hidden from real visitors, catches basic bots. -->
+        <div style="position:absolute;left:-9999px;" aria-hidden="true">
+          <label for="website">Leave this field blank</label>
+          <input id="website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+
         <div class="grid sm:grid-cols-2 gap-5">
           <div>
             <label for="name" class="spec-label block mb-2">Name</label>
@@ -423,20 +429,45 @@
   }, { threshold: 0.15 });
   revealEls.forEach(el => observer.observe(el));
 
-  // Contact form (no backend wired up — replace with your endpoint/service)
+  // Contact form
   const form = document.getElementById('contact-form');
   const status = document.getElementById('form-status');
+  const submitBtn = form.querySelector('button[type="submit"]');
 
-  form.addEventListener('submit', (e) => {
+  function showStatus(message, color) {
+    status.textContent = message;
+    status.style.color = color;
+    status.classList.remove('hidden');
+  }
+
+  form.addEventListener('submit', async (e) => {
     e.preventDefault();
     if (!form.checkValidity()){
       form.reportValidity();
       return;
     }
-    status.textContent = '✓ WORK ORDER RECEIVED — I\'ll follow up within 1 business day.';
-    status.style.color = 'var(--spark)';
-    status.classList.remove('hidden');
-    form.reset();
+
+    const payload = Object.fromEntries(new FormData(form).entries());
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending…';
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'Something went wrong. Please try again.');
+
+      showStatus('✓ WORK ORDER RECEIVED — I\'ll follow up within 1 business day.', 'var(--spark)');
+      form.reset();
+    } catch (err) {
+      showStatus(err.message || 'Could not send — please try again or email/WhatsApp directly.', '#E05B4F');
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Submit Work Order';
+    }
   });
 </script>
 <script src="/js/media-slots.js" defer></script>

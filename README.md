@@ -54,6 +54,21 @@ more by adding `data-slot="..."` to any element (images decorate `<img>`
 tags directly; anything else gets an absolutely-positioned image/video
 layer injected behind its content).
 
+## Contact form
+
+The site's contact form posts to `POST /api/contact`, which validates the
+input, saves every submission to the `contact_messages` table (visible in
+the admin dashboard's "Messages" tab, with an unread-count badge), and —
+only if SMTP is configured — also sends an email notification. Leads are
+never lost even without email set up. Protected by rate limiting (5
+submissions per 15 minutes per IP) and a honeypot field.
+
+To enable email notifications, set `SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`
+(and optionally `SMTP_PORT`, `SMTP_SECURE`, `CONTACT_TO_EMAIL`,
+`CONTACT_FROM_EMAIL`) in `.env` — see `.env.example` for a Gmail App
+Password example. Leave them blank to skip email and just use the admin
+inbox.
+
 ## Security notes
 
 - Uploaded files are verified by magic-byte sniffing (`file-type`), not by

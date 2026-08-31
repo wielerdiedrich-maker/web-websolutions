@@ -17,7 +17,8 @@
     <div class="brand">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:12px;font-weight:600;">ADMIN</span></div>
 
     <div class="nav-section-label">Content</div>
-    <div class="nav-item active"><span class="dot"></span>Media Library</div>
+    <div class="nav-item active" id="nav-media" data-panel="media"><span class="dot"></span>Media Library</div>
+    <div class="nav-item" id="nav-messages" data-panel="messages"><span class="dot"></span>Messages <span id="messages-badge" class="slot-badge" style="position:static;margin-left:auto;" hidden>0</span></div>
     <div class="nav-item disabled"><span class="dot"></span>Products <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
     <div class="nav-item disabled"><span class="dot"></span>Services <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
     <div class="nav-item disabled"><span class="dot"></span>Pages <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
@@ -37,53 +38,65 @@
   </aside>
 
   <main class="main">
-    <div class="topbar">
-      <div>
-        <h1>Media Library</h1>
-        <p class="mute" style="margin:4px 0 0;font-size:13px;">Upload, organize, and publish images &amp; videos to your live site.</p>
+    <div id="panel-media">
+      <div class="topbar">
+        <div>
+          <h1>Media Library</h1>
+          <p class="mute" style="margin:4px 0 0;font-size:13px;">Upload, organize, and publish images &amp; videos to your live site.</p>
+        </div>
       </div>
+
+      <!-- Upload zone -->
+      <div class="upload-zone" id="upload-zone">
+        <p class="font-mono" style="color:var(--paper);font-size:14px;">Drag &amp; drop files here</p>
+        <p>JPG, PNG, WEBP, SVG, MP4, WEBM, MOV — up to 20MB (images) / 300MB (video)</p>
+        <div class="upload-row">
+          <button class="btn-primary" id="browse-btn">Browse Files</button>
+          <input type="file" id="file-input" multiple hidden accept=".jpg,.jpeg,.png,.webp,.svg,.mp4,.webm,.mov">
+          <label class="spec-label" style="margin:0;display:flex;align-items:center;gap:8px;">
+            Folder
+            <input type="text" id="upload-folder" placeholder="uncategorized" style="width:160px;">
+          </label>
+        </div>
+        <div class="upload-progress-list" id="upload-progress-list"></div>
+      </div>
+
+      <!-- Toolbar -->
+      <div class="toolbar">
+        <input type="search" id="search-input" placeholder="Search filenames…">
+        <select id="filter-kind">
+          <option value="">All types</option>
+          <option value="image">Images</option>
+          <option value="video">Videos</option>
+        </select>
+        <select id="filter-folder">
+          <option value="">All folders</option>
+        </select>
+        <select id="sort-select">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name">Name (A–Z)</option>
+          <option value="size">Largest first</option>
+        </select>
+        <div class="spacer"></div>
+        <div class="view-toggle">
+          <button id="view-grid-btn" class="active" title="Grid view">▦</button>
+          <button id="view-list-btn" title="List view">☰</button>
+        </div>
+      </div>
+
+      <div id="media-container"></div>
     </div>
 
-    <!-- Upload zone -->
-    <div class="upload-zone" id="upload-zone">
-      <p class="font-mono" style="color:var(--paper);font-size:14px;">Drag &amp; drop files here</p>
-      <p>JPG, PNG, WEBP, SVG, MP4, WEBM, MOV — up to 20MB (images) / 300MB (video)</p>
-      <div class="upload-row">
-        <button class="btn-primary" id="browse-btn">Browse Files</button>
-        <input type="file" id="file-input" multiple hidden accept=".jpg,.jpeg,.png,.webp,.svg,.mp4,.webm,.mov">
-        <label class="spec-label" style="margin:0;display:flex;align-items:center;gap:8px;">
-          Folder
-          <input type="text" id="upload-folder" placeholder="uncategorized" style="width:160px;">
-        </label>
+    <div id="panel-messages" class="hidden">
+      <div class="topbar">
+        <div>
+          <h1>Messages</h1>
+          <p class="mute" style="margin:4px 0 0;font-size:13px;">Work order requests submitted through the site's contact form.</p>
+        </div>
       </div>
-      <div class="upload-progress-list" id="upload-progress-list"></div>
+      <div id="messages-container"></div>
     </div>
-
-    <!-- Toolbar -->
-    <div class="toolbar">
-      <input type="search" id="search-input" placeholder="Search filenames…">
-      <select id="filter-kind">
-        <option value="">All types</option>
-        <option value="image">Images</option>
-        <option value="video">Videos</option>
-      </select>
-      <select id="filter-folder">
-        <option value="">All folders</option>
-      </select>
-      <select id="sort-select">
-        <option value="newest">Newest first</option>
-        <option value="oldest">Oldest first</option>
-        <option value="name">Name (A–Z)</option>
-        <option value="size">Largest first</option>
-      </select>
-      <div class="spacer"></div>
-      <div class="view-toggle">
-        <button id="view-grid-btn" class="active" title="Grid view">▦</button>
-        <button id="view-list-btn" title="List view">☰</button>
-      </div>
-    </div>
-
-    <div id="media-container"></div>
   </main>
 </div>
 
@@ -139,10 +152,10 @@
   </div>
 </div>
 
-<!-- Delete confirm modal -->
+<!-- Delete confirm modal (reused for media and messages) -->
 <div class="modal-overlay" id="delete-modal" hidden>
   <div class="modal crop-marks">
-    <h3>Delete this file?</h3>
+    <h3 id="delete-modal-title">Delete this file?</h3>
     <p id="delete-modal-text">This will permanently remove the file from storage. If it's currently published to a slot, it will disappear from the live site immediately.</p>
     <div class="modal-actions">
       <button class="btn-ghost" id="delete-cancel-btn">Cancel</button>

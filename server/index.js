@@ -12,6 +12,7 @@ const { requireAuth } = require('./auth');
 const { ValidationError, ensureDirs } = require('./mediaProcessor');
 const authRoutes = require('./routes/auth');
 const mediaRoutes = require('./routes/media');
+const contactRoutes = require('./routes/contact');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -59,6 +60,7 @@ app.use('/api/', apiLimiter);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/media', mediaRoutes);
+app.use('/api', contactRoutes);
 
 // Publicly served, generated media (images/videos). Random filenames only;
 // no directory listing, no script execution of any kind.

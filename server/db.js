@@ -38,6 +38,19 @@ db.exec(`
     expires INTEGER NOT NULL,
     data TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS contact_messages (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    business_type TEXT,
+    details TEXT NOT NULL,
+    email_sent INTEGER NOT NULL DEFAULT 0,
+    is_read INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_contact_created ON contact_messages(created_at);
 `);
 
 module.exports = db;
