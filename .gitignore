@@ -1,0 +1,11 @@
+node_modules/
+.env
+data/
+uploads/originals/*
+uploads/optimized/*
+uploads/thumbs/*
+!uploads/originals/.gitkeep
+!uploads/optimized/.gitkeep
+!uploads/thumbs/.gitkeep
+*.log
+.DS_Store

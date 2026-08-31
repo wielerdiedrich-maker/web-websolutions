@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Media Library — DW Web Solutions Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:12px;font-weight:600;">ADMIN</span></div>
+
+    <div class="nav-section-label">Content</div>
+    <div class="nav-item active"><span class="dot"></span>Media Library</div>
+    <div class="nav-item disabled"><span class="dot"></span>Products <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Services <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pages <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Blog Posts <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Testimonials <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Portfolio <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pricing <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">Site</div>
+    <div class="nav-item disabled"><span class="dot"></span>Banners <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>SEO Settings <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="sidebar-footer">
+      <div class="mute" id="whoami" style="margin-bottom:10px;"></div>
+      <button class="btn-ghost" id="logout-btn" style="width:100%;">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Media Library</h1>
+        <p class="mute" style="margin:4px 0 0;font-size:13px;">Upload, organize, and publish images &amp; videos to your live site.</p>
+      </div>
+    </div>
+
+    <!-- Upload zone -->
+    <div class="upload-zone" id="upload-zone">
+      <p class="font-mono" style="color:var(--paper);font-size:14px;">Drag &amp; drop files here</p>
+      <p>JPG, PNG, WEBP, SVG, MP4, WEBM, MOV — up to 20MB (images) / 300MB (video)</p>
+      <div class="upload-row">
+        <button class="btn-primary" id="browse-btn">Browse Files</button>
+        <input type="file" id="file-input" multiple hidden accept=".jpg,.jpeg,.png,.webp,.svg,.mp4,.webm,.mov">
+        <label class="spec-label" style="margin:0;display:flex;align-items:center;gap:8px;">
+          Folder
+          <input type="text" id="upload-folder" placeholder="uncategorized" style="width:160px;">
+        </label>
+      </div>
+      <div class="upload-progress-list" id="upload-progress-list"></div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <input type="search" id="search-input" placeholder="Search filenames…">
+      <select id="filter-kind">
+        <option value="">All types</option>
+        <option value="image">Images</option>
+        <option value="video">Videos</option>
+      </select>
+      <select id="filter-folder">
+        <option value="">All folders</option>
+      </select>
+      <select id="sort-select">
+        <option value="newest">Newest first</option>
+        <option value="oldest">Oldest first</option>
+        <option value="name">Name (A–Z)</option>
+        <option value="size">Largest first</option>
+      </select>
+      <div class="spacer"></div>
+      <div class="view-toggle">
+        <button id="view-grid-btn" class="active" title="Grid view">▦</button>
+        <button id="view-list-btn" title="List view">☰</button>
+      </div>
+    </div>
+
+    <div id="media-container"></div>
+  </main>
+</div>
+
+<!-- Assign slot modal -->
+<div class="modal-overlay" id="slot-modal" hidden>
+  <div class="modal crop-marks">
+    <h3>Publish to a page slot</h3>
+    <p>Assign this file to a slot key and it will appear live on the website immediately — no code changes needed.</p>
+    <div class="field">
+      <label class="spec-label" for="slot-input">Slot key</label>
+      <input type="text" id="slot-input" placeholder="e.g. hero.background">
+      <p class="hint">In use on the current site: <code>hero.background</code>, <code>work.plate-01</code>, <code>work.plate-02</code>, <code>work.plate-03</code>. Leave blank to unpublish from any slot.</p>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="slot-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="slot-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Rename / folder modal -->
+<div class="modal-overlay" id="edit-modal" hidden>
+  <div class="modal crop-marks">
+    <h3>Edit details</h3>
+    <p>Update the display name or folder for this file.</p>
+    <div class="field">
+      <label class="spec-label" for="edit-name-input">File name</label>
+      <input type="text" id="edit-name-input">
+    </div>
+    <div class="field">
+      <label class="spec-label" for="edit-folder-input">Folder</label>
+      <input type="text" id="edit-folder-input">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="edit-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="edit-save-btn">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- Replace file modal -->
+<div class="modal-overlay" id="replace-modal" hidden>
+  <div class="modal crop-marks">
+    <h3>Replace file</h3>
+    <p>Upload a new file to replace this item. Its slot assignment and folder stay the same, so anywhere it's used on the site updates automatically.</p>
+    <div class="field">
+      <input type="file" id="replace-input" accept=".jpg,.jpeg,.png,.webp,.svg,.mp4,.webm,.mov">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="replace-cancel-btn">Cancel</button>
+      <button class="btn-primary" id="replace-save-btn">Upload &amp; Replace</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete confirm modal -->
+<div class="modal-overlay" id="delete-modal" hidden>
+  <div class="modal crop-marks">
+    <h3>Delete this file?</h3>
+    <p id="delete-modal-text">This will permanently remove the file from storage. If it's currently published to a slot, it will disappear from the live site immediately.</p>
+    <div class="modal-actions">
+      <button class="btn-ghost" id="delete-cancel-btn">Cancel</button>
+      <button class="btn-danger" id="delete-confirm-btn">Delete Permanently</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script src="/admin/assets/admin-shared.js"></script>
+<script src="/admin/assets/admin.js"></script>
+</body>
+</html>
