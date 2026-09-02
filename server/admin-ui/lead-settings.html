@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Lead Machine Settings — DW Admin</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:12px;font-weight:600;">ADMIN</span></div>
+
+    <div class="nav-section-label">Content</div>
+    <a class="nav-item" href="/admin"><span class="dot"></span>Media Library</a>
+    <div class="nav-item disabled"><span class="dot"></span>Products <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Services <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pages <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Blog Posts <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Testimonials <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Portfolio <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pricing <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">Site</div>
+    <a class="nav-item" href="/admin/messages"><span class="dot"></span>Messages</a>
+    <div class="nav-item disabled"><span class="dot"></span>Banners <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>SEO Settings <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">DW Lead Machine</div>
+    <a class="nav-item" href="/admin/leads"><span class="dot"></span>Leads</a>
+    <a class="nav-item active" href="/admin/lead-settings"><span class="dot"></span>Lead Machine Settings</a>
+
+    <div class="sidebar-footer">
+      <div class="mute" id="whoami" style="margin-bottom:10px;"></div>
+      <button class="btn-ghost" id="logout-btn" style="width:100%;">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Lead Machine Settings</h1>
+        <p class="mute" style="margin:4px 0 0;font-size:13px;">Business info, follow-up timing, and message templates for the DW Lead Machine.</p>
+      </div>
+    </div>
+
+    <div class="detail-section">
+      <h4>Integrations</h4>
+      <div id="integrations-status" style="display:flex;gap:10px;flex-wrap:wrap;"></div>
+      <p class="mute" style="font-size:12px;margin-top:10px;">Configured via environment variables (never entered here) — see README for setup steps. A feature shows "not configured" and degrades gracefully instead of breaking when its credentials are missing.</p>
+    </div>
+
+    <form id="settings-form">
+      <div class="detail-section">
+        <h4>Business</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+          <div><label class="spec-label">Business name</label><input name="business_name"></div>
+          <div><label class="spec-label">Owner notification email</label><input name="owner_notification_email" type="email"></div>
+          <div><label class="spec-label">Sender name</label><input name="sender_name"></div>
+          <div><label class="spec-label">Sender email (SMTP "From")</label><input name="sender_email" type="email" placeholder="Uses SMTP_FROM env if blank"></div>
+          <div><label class="spec-label">Booking URL (Calendly, etc.)</label><input name="booking_url" placeholder="https://calendly.com/..."></div>
+          <div><label class="spec-label">Google Review URL</label><input name="review_url" placeholder="https://g.page/r/..."></div>
+        </div>
+        <div style="margin-top:14px;">
+          <label class="spec-label">Services offered (one per line)</label>
+          <textarea name="services" rows="5"></textarea>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Follow-up timing (days after submission, if not yet contacted)</h4>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;">
+          <div><label class="spec-label">Follow-up 1</label><input name="followup_1_days" type="number" min="0"></div>
+          <div><label class="spec-label">Follow-up 2</label><input name="followup_2_days" type="number" min="0"></div>
+          <div><label class="spec-label">Follow-up 3 (final)</label><input name="followup_3_days" type="number" min="0"></div>
+        </div>
+      </div>
+
+      <div class="detail-section">
+        <h4>Email templates</h4>
+        <p class="mute" style="font-size:11.5px;margin-bottom:10px;">Placeholders: <code>{{first_name}}</code> <code>{{business_name}}</code> <code>{{booking_url}}</code> <code>{{review_url}}</code> <code>{{service}}</code></p>
+        <label class="spec-label">Confirmation subject</label>
+        <input name="confirmation_subject" style="margin-bottom:12px;">
+        <label class="spec-label">Confirmation email (sent immediately)</label>
+        <textarea name="confirmation_template" rows="5" style="margin-bottom:12px;"></textarea>
+        <label class="spec-label">Follow-up 1</label>
+        <textarea name="followup_1_template" rows="3" style="margin-bottom:12px;"></textarea>
+        <label class="spec-label">Follow-up 2</label>
+        <textarea name="followup_2_template" rows="3" style="margin-bottom:12px;"></textarea>
+        <label class="spec-label">Follow-up 3 (final)</label>
+        <textarea name="followup_3_template" rows="3" style="margin-bottom:12px;"></textarea>
+        <label class="spec-label">Review request (manual — triggered when you mark a job Won/complete)</label>
+        <textarea name="review_request_template" rows="3"></textarea>
+      </div>
+
+      <button type="submit" class="btn-primary">Save Settings</button>
+      <span id="save-status" class="mute" style="margin-left:12px;font-size:12.5px;"></span>
+    </form>
+  </main>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script src="/admin/assets/admin-shared.js"></script>
+<script src="/admin/assets/lead-settings.js"></script>
+</body>
+</html>

@@ -13,6 +13,10 @@ const { ValidationError, ensureDirs } = require('./mediaProcessor');
 const authRoutes = require('./routes/auth');
 const mediaRoutes = require('./routes/media');
 const contactRoutes = require('./routes/contact');
+const leadsRoutes = require('./routes/leads');
+const settingsRoutes = require('./routes/settings');
+const webhookRoutes = require('./routes/webhooks');
+const followupScheduler = require('./services/followupScheduler');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -61,6 +65,9 @@ app.use('/api/', apiLimiter);
 app.use('/api/auth', authRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/contact', contactRoutes);
+app.use('/api/leads', leadsRoutes);
+app.use('/api/settings', settingsRoutes);
+app.use('/api/webhooks', webhookRoutes);
 
 // Publicly served, generated media (images/videos). Random filenames only;
 // no directory listing, no script execution of any kind.
@@ -88,6 +95,12 @@ app.get(['/admin', '/admin/', '/admin/index.html'], requireAuth, (req, res) => {
 app.get(['/admin/messages', '/admin/messages.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(adminUiDir, 'messages.html'));
 });
+app.get(['/admin/leads', '/admin/leads.html'], requireAuth, (req, res) => {
+  res.sendFile(path.join(adminUiDir, 'leads.html'));
+});
+app.get(['/admin/lead-settings', '/admin/lead-settings.html'], requireAuth, (req, res) => {
+  res.sendFile(path.join(adminUiDir, 'lead-settings.html'));
+});
 
 // --- Public marketing site
 app.use(express.static(path.join(__dirname, '..', 'public'), { index: 'index.html' }));
@@ -109,5 +122,6 @@ app.use((err, req, res, next) => {
 ensureDirs().then(() => {
   app.listen(PORT, () => {
     console.log(`DW Web Solutions server running on http://localhost:${PORT}`);
+    followupScheduler.start();
   });
 });

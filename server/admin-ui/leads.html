@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Leads — DW Lead Machine</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/admin/assets/admin.css">
+</head>
+<body>
+<div class="shell">
+
+  <aside class="sidebar">
+    <div class="brand">DW<span class="accent">/</span>WEB <span class="mute" style="font-size:12px;font-weight:600;">ADMIN</span></div>
+
+    <div class="nav-section-label">Content</div>
+    <a class="nav-item" href="/admin"><span class="dot"></span>Media Library</a>
+    <div class="nav-item disabled"><span class="dot"></span>Products <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Services <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pages <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Blog Posts <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Testimonials <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Portfolio <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>Pricing <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">Site</div>
+    <a class="nav-item" href="/admin/messages"><span class="dot"></span>Messages</a>
+    <div class="nav-item disabled"><span class="dot"></span>Banners <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+    <div class="nav-item disabled"><span class="dot"></span>SEO Settings <span class="mute" style="margin-left:auto;font-size:10px;">soon</span></div>
+
+    <div class="nav-section-label">DW Lead Machine</div>
+    <a class="nav-item active" href="/admin/leads"><span class="dot"></span>Leads</a>
+    <a class="nav-item" href="/admin/lead-settings"><span class="dot"></span>Lead Machine Settings</a>
+
+    <div class="sidebar-footer">
+      <div class="mute" id="whoami" style="margin-bottom:10px;"></div>
+      <button class="btn-ghost" id="logout-btn" style="width:100%;">Log Out</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>Leads</h1>
+        <p class="mute" style="margin:4px 0 0;font-size:13px;">Every submission from the DW Lead Machine capture form, AI-qualified on arrival.</p>
+      </div>
+      <button class="btn-ghost" id="run-followups-btn">Run follow-ups now</button>
+    </div>
+
+    <div class="stats-row" id="stats-row"></div>
+
+    <div class="toolbar">
+      <input type="search" id="search-input" placeholder="Search name, email, service…">
+      <select id="filter-status">
+        <option value="">All statuses</option>
+        <option>New</option>
+        <option>Contacted</option>
+        <option>Qualified</option>
+        <option>Appointment Booked</option>
+        <option>Quote Sent</option>
+        <option>Won</option>
+        <option>Lost</option>
+        <option>Needs Follow-Up</option>
+      </select>
+      <select id="filter-ai-status">
+        <option value="">All AI statuses</option>
+        <option value="HOT">Hot</option>
+        <option value="WARM">Warm</option>
+        <option value="COLD">Cold</option>
+        <option value="NEEDS_INFO">Needs Info</option>
+      </select>
+    </div>
+
+    <div id="leads-container"></div>
+  </main>
+</div>
+
+<!-- Lead detail modal -->
+<div class="modal-overlay" id="detail-modal" hidden>
+  <div class="modal crop-marks" style="max-width:760px;max-height:88vh;overflow:auto;">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
+      <div>
+        <h3 id="detail-name" style="margin-bottom:2px;"></h3>
+        <p class="mute" id="detail-meta" style="margin:0;font-size:12.5px;"></p>
+      </div>
+      <span id="detail-ai-badge"></span>
+    </div>
+
+    <div class="detail-grid" style="margin-top:18px;">
+      <div>
+        <div class="detail-section">
+          <h4>Project</h4>
+          <p style="white-space:pre-wrap;font-size:13.5px;" id="detail-description"></p>
+          <div class="mute" style="font-size:12.5px;line-height:1.9;" id="detail-fields"></div>
+        </div>
+        <div class="detail-section" id="detail-files-wrap" hidden>
+          <h4>Uploaded files</h4>
+          <div class="file-thumb-row" id="detail-files"></div>
+        </div>
+        <div class="detail-section">
+          <h4>AI qualification</h4>
+          <p style="font-size:13.5px;" id="detail-ai-summary"></p>
+          <p class="mute" style="font-size:12.5px;" id="detail-ai-action"></p>
+          <p class="mute" style="font-size:12.5px;" id="detail-ai-missing"></p>
+          <p class="mute" style="font-size:11px;" id="detail-ai-engine"></p>
+        </div>
+      </div>
+      <div>
+        <div class="detail-section">
+          <h4>Status</h4>
+          <select id="detail-status" style="margin-bottom:10px;">
+            <option>New</option><option>Contacted</option><option>Qualified</option>
+            <option>Appointment Booked</option><option>Quote Sent</option><option>Won</option>
+            <option>Lost</option><option>Needs Follow-Up</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;margin-bottom:8px;">
+            <input type="checkbox" id="detail-contacted" style="width:auto;"> Marked contacted (stops follow-up)
+          </label>
+          <label style="display:flex;align-items:center;gap:8px;font-size:13px;">
+            <input type="checkbox" id="detail-opted-out" style="width:auto;"> Opted out of automated messages
+          </label>
+        </div>
+        <div class="detail-section">
+          <h4>Notes</h4>
+          <textarea id="detail-notes" rows="4" placeholder="Internal notes…"></textarea>
+        </div>
+        <div class="detail-section">
+          <h4>Activity</h4>
+          <ul class="timeline" id="detail-timeline"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn-danger" id="detail-delete-btn">Delete</button>
+      <button class="btn-ghost" id="detail-close-btn">Close</button>
+      <button class="btn-primary" id="detail-save-btn">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-stack" id="toast-stack"></div>
+
+<script src="/admin/assets/admin-shared.js"></script>
+<script src="/admin/assets/leads.js"></script>
+</body>
+</html>

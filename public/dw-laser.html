@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DW Laser — Custom Laser Engraving | Demo powered by DW Lead Machine</title>
+<meta name="description" content="Custom laser engraving for tumblers, signage, and bulk corporate orders. This page is a live demonstration of the DW Lead Machine lead-capture system.">
+<meta name="robots" content="noindex">
+
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/brand.css">
+</head>
+<body class="antialiased">
+
+<div class="max-w-3xl mx-auto px-5 pt-4">
+  <div class="spec-label text-center py-2 border-b border-[var(--steel-line)]">
+    DEMONSTRATION PAGE — this is DW Design &amp; Web's own DW Lead Machine, configured for a laser-engraving business, shown live to prospective clients.
+  </div>
+</div>
+
+<section class="relative pt-14 pb-20 sm:pt-20 sm:pb-24 blueprint-grid overflow-hidden">
+  <div class="absolute inset-0 pointer-events-none" style="background:radial-gradient(ellipse at 20% 0%, rgba(15,53,80,0.55), transparent 55%);"></div>
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 relative text-center">
+    <span class="ticket-num">DW LASER — CUSTOM ENGRAVING</span>
+    <h1 class="font-display font-900 text-4xl sm:text-5xl leading-[1.05] tracking-tight mt-4">
+      Custom laser engraving, <span class="text-[var(--spark)]">done right</span>.
+    </h1>
+    <p class="mt-5 text-base sm:text-lg text-[var(--mute)] max-w-xl mx-auto leading-relaxed">
+      Tumblers, signage, plaques, and bulk corporate orders — engraved to spec.
+      Tell us about your project below and we'll follow up with next steps.
+    </p>
+  </div>
+</section>
+
+<section class="py-16 sm:py-20">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8">
+    <div id="dw-lead-machine"
+      data-endpoint="/api/leads"
+      data-business="DW Laser"
+      data-heading="Ready to Get Started?"
+      data-subheading="Tell us a little about your project and we'll help you with the next step."
+      data-services="Custom Engraved Tumblers,Signage &amp; Plaques,Corporate / Bulk Orders,Awards &amp; Recognition,Other"
+    ></div>
+  </div>
+</section>
+
+<footer class="border-t border-[var(--steel-line)] py-10">
+  <div class="max-w-3xl mx-auto px-5 sm:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="font-display font-700 text-sm">DW<span class="text-[var(--spark)]">/</span>LASER</div>
+    <p class="spec-label text-center">POWERED BY DW LEAD MACHINE</p>
+    <p class="text-[var(--mute)] text-xs font-mono">© 2026 DW Laser (demo)</p>
+  </div>
+</footer>
+
+<script src="/js/lead-form.js" defer></script>
+</body>
+</html>
