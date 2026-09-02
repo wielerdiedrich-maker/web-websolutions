@@ -50,6 +50,67 @@ db.exec(`
   );
 
   CREATE INDEX IF NOT EXISTS idx_contact_created ON contact_messages(created_at);
+
+  -- ===== DW Lead Machine =====
+
+  CREATE TABLE IF NOT EXISTS leads (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT,
+    company TEXT,
+    service TEXT NOT NULL,
+    description TEXT NOT NULL,
+    budget TEXT,
+    timeframe TEXT,
+    preferred_contact TEXT,
+    preferred_appointment_time TEXT,
+    status TEXT NOT NULL DEFAULT 'New' CHECK (
+      status IN ('New','Contacted','Qualified','Appointment Booked','Quote Sent','Won','Lost','Needs Follow-Up')
+    ),
+    ai_status TEXT CHECK (ai_status IN ('HOT','WARM','COLD','NEEDS_INFO') OR ai_status IS NULL),
+    ai_summary TEXT,
+    ai_recommended_action TEXT,
+    ai_missing_info TEXT,
+    ai_engine TEXT,
+    notes TEXT NOT NULL DEFAULT '',
+    contacted_at TEXT,
+    appointment_booked_at TEXT,
+    opted_out INTEGER NOT NULL DEFAULT 0,
+    follow_up_stage INTEGER NOT NULL DEFAULT 0,
+    unsubscribe_token TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+  CREATE INDEX IF NOT EXISTS idx_leads_ai_status ON leads(ai_status);
+  CREATE INDEX IF NOT EXISTS idx_leads_created ON leads(created_at);
+  CREATE INDEX IF NOT EXISTS idx_leads_unsub ON leads(unsubscribe_token);
+
+  CREATE TABLE IF NOT EXISTS lead_files (
+    id TEXT PRIMARY KEY,
+    lead_id TEXT NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+    media_id TEXT NOT NULL REFERENCES media(id) ON DELETE CASCADE,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_lead_files_lead ON lead_files(lead_id);
+
+  CREATE TABLE IF NOT EXISTS lead_events (
+    id TEXT PRIMARY KEY,
+    lead_id TEXT NOT NULL REFERENCES leads(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    detail TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
+  CREATE INDEX IF NOT EXISTS idx_lead_events_lead ON lead_events(lead_id);
+
+  CREATE TABLE IF NOT EXISTS settings (
+    key TEXT PRIMARY KEY,
+    value TEXT
+  );
 `);
 
 module.exports = db;
