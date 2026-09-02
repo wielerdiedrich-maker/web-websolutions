@@ -1,0 +1,16 @@
+node_modules
+npm-debug.log
+data
+uploads/originals/*
+uploads/optimized/*
+uploads/thumbs/*
+!uploads/originals/.gitkeep
+!uploads/optimized/.gitkeep
+!uploads/thumbs/.gitkeep
+.env
+.env.*
+!.env.example
+*.log
+.git
+.gitignore
+README.md

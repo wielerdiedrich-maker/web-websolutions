@@ -42,6 +42,82 @@ npm run dev        # development (NODE_ENV=development)
 - Public site: `http://localhost:3000/`
 - Admin dashboard: `http://localhost:3000/admin` (redirects to login if not authenticated)
 
+## Deployment
+
+**This app cannot run on Vercel.** Vercel only executes stateless
+serverless functions with an ephemeral filesystem; this app is a
+long-running Node process (`app.listen()`) with a SQLite database file
+(`data/app.db`), a SQLite-backed session store, and local-disk media/lead-
+file storage (`uploads/`). If you've pointed a Vercel project at this repo,
+its zero-config static detection may be serving the files in `public/`
+directly — which is why the marketing pages can look like they're "working"
+— but `/admin`, `/api/*`, login, and the entire Lead Machine dashboard will
+always 404 there, no matter what changes are made to the code. Deploy it
+somewhere that runs a persistent server with persistent disk instead.
+
+A `Dockerfile` is included and works on either of these:
+
+### Option A: Fly.io
+
+```bash
+brew install flyctl   # or see fly.io/docs/flyctl/install
+fly auth login
+fly launch --no-deploy        # detects the Dockerfile; pick a unique app name
+fly volumes create dw_data --size 1     # persistent volume for data/ + uploads/
+```
+
+Add to the generated `fly.toml`:
+
+```toml
+[mounts]
+  source = "dw_data"
+  destination = "/app/data"
+```
+
+Uploaded media needs its own mount too (a second volume, or widen the one
+above to a parent directory both `data/` and `uploads/` live under) —
+simplest is two small volumes:
+
+```bash
+fly volumes create dw_uploads --size 1
+```
+
+```toml
+[[mounts]]
+  source = "dw_data"
+  destination = "/app/data"
+[[mounts]]
+  source = "dw_uploads"
+  destination = "/app/uploads"
+```
+
+Then set secrets (everything from `.env.example`) and deploy:
+
+```bash
+fly secrets set SESSION_SECRET=... ADMIN_USERNAME=admin ADMIN_PASSWORD_HASH='...' \
+  OPENAI_API_KEY=... SMTP_HOST=... SMTP_PORT=587 SMTP_USER=... SMTP_PASS=... SMTP_FROM=...
+fly deploy
+```
+
+### Option B: Railway
+
+1. New Project → Deploy from GitHub repo → select `web-websolutions`.
+   Railway detects the `Dockerfile` automatically.
+2. Add a **Volume**, mounted at `/app/data`, and a second one mounted at
+   `/app/uploads` (Settings → Volumes on the service) — without this,
+   leads/media/sessions reset on every redeploy.
+3. Add every variable from `.env.example` under Variables.
+4. Set the public port to `3000` (matches `PORT` default / the Dockerfile's
+   `EXPOSE 3000`).
+
+### Either way
+
+- `SESSION_SECRET` and `ADMIN_PASSWORD_HASH` are required at boot — the
+  process exits immediately without them (see `server/index.js`).
+- Set `PUBLIC_BASE_URL` to the real deployed URL so unsubscribe links in
+  follow-up emails resolve correctly.
+- Once deployed, `/admin` will actually work — it never could on Vercel.
+
 ## How media reaches the public site
 
 Any element in `public/index.html` carrying `data-slot="some.key"` is filled
