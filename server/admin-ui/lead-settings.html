@@ -55,6 +55,14 @@
       <p class="mute" style="font-size:12px;margin-top:10px;">Configured via environment variables (never entered here) — see README for setup steps. A feature shows "not configured" and degrades gracefully instead of breaking when its credentials are missing.</p>
     </div>
 
+    <div class="detail-section">
+      <h4>Google Calendar</h4>
+      <p class="mute" style="font-size:13px;margin-bottom:10px;" id="google-status-text">Checking status…</p>
+      <button type="button" class="btn-primary" id="google-connect-btn" hidden>Connect Google Calendar</button>
+      <button type="button" class="btn-ghost" id="google-disconnect-btn" hidden>Disconnect</button>
+      <p class="mute" style="font-size:12px;margin-top:10px;">When connected: a reminder is added to your calendar the moment a new lead comes in, and a real event is created once an appointment is confirmed (e.g. via the Calendly webhook).</p>
+    </div>
+
     <form id="settings-form">
       <div class="detail-section">
         <h4>Business</h4>

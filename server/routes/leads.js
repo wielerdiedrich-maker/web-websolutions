@@ -13,6 +13,7 @@ const { getSettings, fillTemplate } = require('../services/settings');
 const { sendEmail } = require('../services/email');
 const { qualifyLead } = require('../services/aiQualify');
 const { runFollowupsNow } = require('../services/followupScheduler');
+const googleCalendar = require('../services/googleCalendar');
 
 const router = express.Router();
 
@@ -226,6 +227,17 @@ router.post('/', submitLimiter, upload.array('files', 8), async (req, res) => {
     });
     logEvent(id, 'ai_qualified', `${qualification.status} via ${qualification.engine}`);
 
+    const dashboardUrl = `${req.protocol}://${req.get('host')}/admin/leads?id=${id}`;
+    const calendarReminder = await googleCalendar.createReminderEventForLead(
+      { name, service, description, email, phone, company, aiSummary: qualification.summary },
+      { dashboardUrl }
+    );
+    logEvent(
+      id,
+      calendarReminder.created ? 'calendar_reminder_created' : 'calendar_reminder_failed',
+      calendarReminder.reason || calendarReminder.htmlLink
+    );
+
     const firstName = name.split(/\s+/)[0];
     const templateVars = {
       first_name: firstName,
@@ -261,7 +273,7 @@ router.post('/', submitLimiter, upload.array('files', 8), async (req, res) => {
         qualification.recommended_action || '(none)',
         qualification.missing_info.length ? `\nMissing information: ${qualification.missing_info.join(', ')}` : '',
         '',
-        `View lead: ${req.protocol}://${req.get('host')}/admin/leads?id=${id}`,
+        `View lead: ${dashboardUrl}`,
       ]
         .filter((l) => l !== '')
         .join('\n');
@@ -351,7 +363,7 @@ router.get('/:id', (req, res) => {
   res.json(serializeLead(row, { withFiles: true, withEvents: true }));
 });
 
-router.patch('/:id', requireSameOriginHeader, (req, res) => {
+router.patch('/:id', requireSameOriginHeader, async (req, res) => {
   const row = db.prepare('SELECT * FROM leads WHERE id = ?').get(req.params.id);
   if (!row) return res.status(404).json({ error: 'Lead not found.' });
 
@@ -384,6 +396,13 @@ router.patch('/:id', requireSameOriginHeader, (req, res) => {
     if (appointmentBookedAt) {
       updates.status = 'Appointment Booked';
       logEvent(row.id, 'appointment_booked', appointmentBookedAt);
+      const dashboardUrl = `${req.protocol}://${req.get('host')}/admin/leads?id=${row.id}`;
+      const calendarEvent = await googleCalendar.createAppointmentEventForLead(row, appointmentBookedAt, { dashboardUrl });
+      logEvent(
+        row.id,
+        calendarEvent.created ? 'calendar_event_created' : 'calendar_event_failed',
+        calendarEvent.reason || calendarEvent.htmlLink
+      );
     }
   }
 

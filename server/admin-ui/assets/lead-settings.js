@@ -51,6 +51,54 @@
     }
   }
 
+  function renderGoogleStatus(status) {
+    const textEl = el('google-status-text');
+    const connectBtn = el('google-connect-btn');
+    const disconnectBtn = el('google-disconnect-btn');
+
+    if (!status.appCredentialsConfigured) {
+      textEl.textContent = 'Not configured — set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET in the server environment first (see .env.example).';
+      connectBtn.hidden = true;
+      disconnectBtn.hidden = true;
+    } else if (status.connected) {
+      textEl.textContent = `Connected as ${status.accountEmail || 'unknown account'}.`;
+      connectBtn.hidden = true;
+      disconnectBtn.hidden = false;
+    } else {
+      textEl.textContent = 'Server is configured but not connected to a Google account yet.';
+      connectBtn.hidden = false;
+      disconnectBtn.hidden = true;
+    }
+  }
+
+  async function loadGoogleStatus() {
+    const res = await adminFetch('/api/google/status');
+    if (!res.ok) return;
+    renderGoogleStatus(await res.json());
+  }
+
+  el('google-connect-btn').addEventListener('click', () => {
+    window.location.href = '/api/google/connect';
+  });
+
+  el('google-disconnect-btn').addEventListener('click', async () => {
+    const res = await adminFetch('/api/google/disconnect', { method: 'POST' });
+    if (!res.ok) return toast('Failed to disconnect.', 'error');
+    toast('Google Calendar disconnected.', 'success');
+    loadGoogleStatus();
+  });
+
+  function handleGoogleOAuthRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    if (!params.has('google')) return;
+    if (params.get('google') === 'connected') {
+      toast('Google Calendar connected.', 'success');
+    } else {
+      toast(`Google Calendar connection failed${params.get('reason') ? ': ' + params.get('reason') : ''}.`, 'error');
+    }
+    window.history.replaceState({}, '', '/admin/lead-settings');
+  }
+
   form.addEventListener('submit', async (e) => {
     e.preventDefault();
     const fd = new FormData(form);
@@ -75,6 +123,8 @@
 
   (async function init() {
     await checkSession();
+    handleGoogleOAuthRedirect();
     await loadSettings();
+    await loadGoogleStatus();
   })();
 })();
