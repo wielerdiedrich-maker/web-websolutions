@@ -111,6 +111,19 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT
   );
+
+  -- Single-row table (never joined, never sent to the browser): holds the
+  -- Google Calendar OAuth refresh token. Kept separate from the generic
+  -- "settings" KV table on purpose, since services.getSettings() does an
+  -- unfiltered SELECT * that flows straight into an admin API response —
+  -- a secret token in that table would leak to the browser.
+  CREATE TABLE IF NOT EXISTS google_calendar_auth (
+    id INTEGER PRIMARY KEY CHECK (id = 1),
+    refresh_token TEXT NOT NULL,
+    account_email TEXT,
+    calendar_id TEXT NOT NULL DEFAULT 'primary',
+    connected_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 module.exports = db;

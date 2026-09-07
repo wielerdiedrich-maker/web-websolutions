@@ -136,6 +136,15 @@ automation, automated review requests, and multi-tenant client isolation.
 9. **DW Laser demo** — `public/dw-laser.html` is the first real-world test
    deployment described in the original spec: a branded page embedding the
    widget, configured for a laser-engraving business.
+10. **Google Calendar sync** — `server/services/googleCalendar.js`, connected
+    once via a "Connect Google Calendar" button at `/admin/lead-settings`
+    (OAuth2, not a manually-pasted key). Once connected: every new lead
+    creates a same-day reminder event on your calendar so nothing sits
+    unnoticed, and a confirmed appointment (from the Calendly webhook, or a
+    `PATCH /api/leads/:id` with `appointmentBookedAt` set) creates a real
+    calendar event. Both are logged to `lead_events`
+    (`calendar_reminder_created`/`_failed`, `calendar_event_created`/`_failed`)
+    and degrade to a logged no-op — never an error — when not connected.
 
 ### Database structure (`server/db.js`)
 
@@ -154,6 +163,10 @@ automation, automated review requests, and multi-tenant client isolation.
   follow-up scheduler avoid double-sending.
 - `settings` — generic key/value store for the business config described
   above (single business for now; see Limitations re: multi-tenant).
+- `google_calendar_auth` — single-row table holding the Google OAuth refresh
+  token, connected account email, and target calendar id. Deliberately kept
+  separate from `settings` (which is returned wholesale to the admin UI) so
+  the refresh token is never sent to the browser.
 
 ### API surface
 
@@ -167,10 +180,18 @@ automation, automated review requests, and multi-tenant client isolation.
 - `GET /api/settings`, `PUT /api/settings` — admin-only.
 - `POST /api/webhooks/calendly?token=...` — Calendly booking webhook,
   guarded by `CALENDLY_WEBHOOK_SECRET`; responds `501` until that's set.
+- `GET /api/google/status` — admin-only, `{ appCredentialsConfigured,
+  connected, accountEmail }` (never the refresh token itself).
+- `GET /api/google/connect` — admin-only, redirects to Google's OAuth
+  consent screen.
+- `GET /api/google/oauth/callback` — Google redirects here after consent;
+  exchanges the code, stores the refresh token, redirects back to
+  `/admin/lead-settings`.
+- `POST /api/google/disconnect` — admin-only, forgets the stored token.
 
 ### Configuring each integration
 
-All three are optional at boot — the system runs, accepts leads, and shows
+All four are optional at boot — the system runs, accepts leads, and shows
 "Integration not configured" (readout at `/admin/lead-settings`) instead of
 erroring when any of these are unset.
 
@@ -187,6 +208,15 @@ erroring when any of these are unset.
   Calendly's API. Real signature verification (Calendly issues an HMAC
   signing key per subscription) should replace the current shared-secret
   check once you have a live Calendly account to test against.
+- **Google Calendar**: create an OAuth 2.0 Client ID (Web application) at
+  https://console.cloud.google.com/apis/credentials with the Calendar API
+  enabled, and set the redirect URI there to
+  `<your-domain>/api/google/oauth/callback`. Set `GOOGLE_CLIENT_ID` and
+  `GOOGLE_CLIENT_SECRET` in `.env`. Setting those two values alone is not
+  enough — you then sign in to `/admin/lead-settings` and click "Connect
+  Google Calendar" once, as the account whose calendar should receive
+  events. That one-time OAuth consent is what's stored in
+  `google_calendar_auth`.
 
 ### Creating a new client (manual, for now)
 
@@ -225,6 +255,12 @@ npm run dev
 - Appointment booked: set a lead's status to "Appointment Booked" in the
   dashboard (simulating what the Calendly webhook does) — follow-ups stop
   for the same reason.
+- Google Calendar: without connecting it, the activity timeline shows
+  `calendar_reminder_failed` / `not_configured` on new leads (same graceful
+  no-op pattern as the other integrations). After connecting a real Google
+  account at `/admin/lead-settings`, a new lead should produce a
+  `calendar_reminder_created` event and a matching event on that Google
+  account's primary calendar within a few seconds.
 
 ### Limitations
 
@@ -250,6 +286,12 @@ npm run dev
 - **AI qualification quality** depends entirely on the OpenAI account you
   configure — this build doesn't include prompt evaluation/tuning against
   real historical leads.
+- **Google Calendar events are simple by design**: the new-lead reminder is
+  always a 30-minute block starting immediately (no business-hours logic),
+  appointment events default to 60 minutes, only one calendar (`primary` on
+  the connected account) is supported, and the customer is never added as an
+  attendee (avoids sending them an unexpected Google Calendar invite). All of
+  this is easy to make configurable later if you need it.
 
 ### Estimated monthly operating cost (rough, verify current pricing)
 
@@ -280,10 +322,13 @@ plan.
 - All admin endpoints require the same authenticated session + CSRF-style
   `X-Requested-With` header as the rest of the admin API; nothing new was
   exempted from `requireAuth`.
-- No API keys or secrets are ever sent to the browser — OpenAI/SMTP/Calendly
-  calls are all server-side, credentials come only from environment
+- No API keys or secrets are ever sent to the browser — OpenAI/SMTP/Calendly/
+  Google calls are all server-side, credentials come only from environment
   variables, and `/admin/lead-settings` only ever displays
-  configured/not-configured booleans, never the underlying secret values.
+  configured/not-configured booleans (plus, for Google, the connected
+  account's email), never the underlying secret values. The Google refresh
+  token lives in its own `google_calendar_auth` table, outside the generic
+  `settings` object that `GET /api/settings` returns.
 - The public lead-submission and unsubscribe endpoints are rate-limited;
   the Calendly webhook is disabled by default and requires a shared secret
   once enabled.
@@ -298,9 +343,13 @@ plan.
    deliverability before showing it to prospects.
 2. Register a real Calendly webhook subscription and verify the booking
    flow end-to-end (currently untested).
-3. Build the multi-tenant `clients` table + `client_id` scoping before
+3. Create the Google Cloud OAuth credentials and click "Connect Google
+   Calendar" at `/admin/lead-settings` once this is deployed somewhere with
+   a real HTTPS domain (Google's OAuth redirect needs a stable public URL —
+   it won't work against a temporary/local address in production).
+4. Build the multi-tenant `clients` table + `client_id` scoping before
    onboarding a second business.
-4. Phase 2: Twilio/SMS follow-up, the AI website chat assistant (with a
+5. Phase 2: Twilio/SMS follow-up, the AI website chat assistant (with a
    "talk to a real person" escalation), missed-call automation, and
    automated review requests on job completion.
 

@@ -16,6 +16,7 @@ const contactRoutes = require('./routes/contact');
 const leadsRoutes = require('./routes/leads');
 const settingsRoutes = require('./routes/settings');
 const webhookRoutes = require('./routes/webhooks');
+const googleAuthRoutes = require('./routes/googleAuth');
 const followupScheduler = require('./services/followupScheduler');
 
 const app = express();
@@ -68,6 +69,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/google', googleAuthRoutes);
 
 // Publicly served, generated media (images/videos). Random filenames only;
 // no directory listing, no script execution of any kind.

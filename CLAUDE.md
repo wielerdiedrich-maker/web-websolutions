@@ -115,6 +115,12 @@ reference embed). From there, one request does a lot synchronously, in this orde
    which no-ops to a logged `{sent: false, reason: 'not_configured'}` rather than throwing
    when SMTP env vars are unset — the pipeline runs end-to-end even with zero integrations
    configured.
+5. Create a same-day reminder event via `services/googleCalendar.js` (same no-op-when-
+   unconfigured pattern). A second call site, `createAppointmentEventForLead()`, fires from
+   `routes/webhooks.js` (Calendly) and from the `PATCH /api/leads/:id` handler whenever
+   `appointmentBookedAt` gets set — both routes had to become `async` handlers for this
+   (safe in this Express 5 app: rejected promises in async handlers are auto-forwarded to
+   the error middleware, no extra try/catch needed).
 
 Everything is logged to the append-only `lead_events` table — this is both the dashboard's
 activity timeline *and* the mechanism the follow-up scheduler and Calendly webhook rely on
@@ -139,7 +145,17 @@ real `clients` table and scoping across `leads`/`lead_files`/`lead_events`/`sett
 
 ### Integrations degrade, never break
 
-OpenAI, SMTP, and Calendly are all optional at boot by design. The pattern used throughout
-(`aiQualify.isConfigured()`, `email.isConfigured()`, the `CALENDLY_WEBHOOK_SECRET` check) is
-to check configuration and return a structured "not configured"/fallback result — never throw
-or crash the request. Preserve this pattern for any new integration.
+OpenAI, SMTP, Calendly, and Google Calendar are all optional at boot by design. The pattern
+used throughout (`aiQualify.isConfigured()`, `email.isConfigured()`, the
+`CALENDLY_WEBHOOK_SECRET` check, `googleCalendar.isConfigured()`) is to check configuration
+and return a structured "not configured"/fallback result — never throw or crash the request.
+Preserve this pattern for any new integration.
+
+Google Calendar is also the one integration whose credential isn't just an env var — env vars
+(`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`) only enable the OAuth flow itself; the resulting
+refresh token comes from a one-time interactive "Connect Google Calendar" click at
+`/admin/lead-settings` (`routes/googleAuth.js`) and is stored in its own `google_calendar_auth`
+table — deliberately *not* in the generic `settings` table, since `services/settings.js`'s
+`getSettings()` does an unfiltered `SELECT *` that flows straight into the `GET /api/settings`
+response. Follow that separation for any future integration that stores a secret generated at
+runtime (as opposed to one pasted into `.env`): it must not be reachable through `getSettings()`.

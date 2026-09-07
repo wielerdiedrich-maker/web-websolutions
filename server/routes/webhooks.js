@@ -5,6 +5,7 @@ const { v4: uuidv4 } = require('uuid');
 const db = require('../db');
 const { getSettings } = require('../services/settings');
 const { sendEmail } = require('../services/email');
+const googleCalendar = require('../services/googleCalendar');
 
 const router = express.Router();
 
@@ -31,7 +32,7 @@ function logEvent(leadId, type, detail) {
  * Until CALENDLY_WEBHOOK_SECRET is set, this route responds 501 rather than
  * silently accepting unverified requests.
  */
-router.post('/calendly', (req, res) => {
+router.post('/calendly', async (req, res) => {
   const expected = process.env.CALENDLY_WEBHOOK_SECRET;
   if (!expected) {
     return res.status(501).json({ error: 'Calendly integration not configured.' });
@@ -73,6 +74,14 @@ router.post('/calendly', (req, res) => {
     `UPDATE leads SET status = 'Appointment Booked', appointment_booked_at = ?, updated_at = ? WHERE id = ?`
   ).run(startTime, new Date().toISOString(), lead.id);
   logEvent(lead.id, 'appointment_booked', `via Calendly webhook, ${startTime}`);
+
+  const dashboardUrl = `${req.protocol}://${req.get('host')}/admin/leads?id=${lead.id}`;
+  const calendarEvent = await googleCalendar.createAppointmentEventForLead(lead, startTime, { dashboardUrl });
+  logEvent(
+    lead.id,
+    calendarEvent.created ? 'calendar_event_created' : 'calendar_event_failed',
+    calendarEvent.reason || calendarEvent.htmlLink
+  );
 
   const settings = getSettings();
   if (settings.owner_notification_email) {
