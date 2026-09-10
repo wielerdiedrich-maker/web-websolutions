@@ -99,7 +99,22 @@ async function runFollowupsNow() {
     }
   }
 
-  return { checked: candidates.length, sent, skipped, failed };
+  const assistant = await runAssistantFollowups();
+  return { checked: candidates.length + assistant.checked, sent: sent + assistant.sent, skipped: skipped + assistant.skipped, failed: failed + assistant.failed };
+}
+
+async function runAssistantFollowups() {
+  const rows = db.prepare(`SELECT f.*, c.name, c.email FROM assistant_followups f JOIN assistant_leads l ON l.id=f.lead_id JOIN assistant_customers c ON c.id=l.customer_id WHERE f.status='PENDING' AND f.scheduled_for <= datetime('now') AND c.opted_out=0 AND l.lead_status NOT IN ('ORDER_READY')`).all();
+  let sent=0, skipped=0, failed=0;
+  for (const row of rows) {
+    if (!row.email) { skipped++; db.prepare("UPDATE assistant_followups SET status='CANCELLED', cancelled_at=datetime('now') WHERE id=?").run(row.id); continue; }
+    try {
+      const result = await sendEmail({ to: row.email, subject: 'Following up — DW Laser', text: `${row.template}\n\nReply to this email whenever you are ready.`, fromName: 'DW Laser', fromEmail: process.env.SMTP_FROM });
+      db.prepare("UPDATE assistant_followups SET status=?, attempt_count=attempt_count+1, sent_at=CASE WHEN ? THEN datetime('now') ELSE sent_at END WHERE id=?").run(result.sent ? 'SENT' : 'FAILED', result.sent ? 1 : 0, row.id);
+      if (result.sent) sent++; else failed++;
+    } catch (err) { failed++; console.error('[followupScheduler] Assistant follow-up failed:', err.message); }
+  }
+  return { checked: rows.length, sent, skipped, failed };
 }
 
 function start() {

@@ -23,7 +23,7 @@
     "@ffmpeg-installer/ffmpeg": "^1.1.0",
     "@ffprobe-installer/ffprobe": "^2.1.2",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^13.0.3",
+    "better-sqlite3": "^11.10.0",
     "dompurify": "^3.4.14",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",

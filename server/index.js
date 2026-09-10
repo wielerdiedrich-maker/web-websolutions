@@ -16,6 +16,7 @@ const contactRoutes = require('./routes/contact');
 const leadsRoutes = require('./routes/leads');
 const settingsRoutes = require('./routes/settings');
 const webhookRoutes = require('./routes/webhooks');
+const assistantRoutes = require('./routes/assistant');
 const followupScheduler = require('./services/followupScheduler');
 
 const app = express();
@@ -68,6 +69,7 @@ app.use('/api/contact', contactRoutes);
 app.use('/api/leads', leadsRoutes);
 app.use('/api/settings', settingsRoutes);
 app.use('/api/webhooks', webhookRoutes);
+app.use('/api/assistant', assistantRoutes);
 
 // Publicly served, generated media (images/videos). Random filenames only;
 // no directory listing, no script execution of any kind.
@@ -100,6 +102,9 @@ app.get(['/admin/leads', '/admin/leads.html'], requireAuth, (req, res) => {
 });
 app.get(['/admin/lead-settings', '/admin/lead-settings.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(adminUiDir, 'lead-settings.html'));
+});
+app.get(['/admin/assistant', '/admin/assistant.html'], requireAuth, (req, res) => {
+  res.sendFile(path.join(adminUiDir, 'assistant.html'));
 });
 
 // --- Public marketing site

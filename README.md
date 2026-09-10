@@ -79,6 +79,48 @@ JSON-LD block in `public/index.html`.
 
 ## DW Lead Machine
 
+## DW Laser AI Lead & Quote Assistant (MVP)
+
+The DW Laser assistant is now available at `/dw-laser.html` and its protected operations dashboard is at `/admin/assistant`. It adds a mobile-friendly customer chat/quote widget, a tenant-aware SQLite schema, an authoritative server-side pricing engine, private artwork uploads, structured assistant leads, quote snapshots, and lead-to-order conversion.
+
+### Architecture overview
+
+The existing Express application remains the host. Public browser requests use `/api/assistant` and only receive validated data. The server owns pricing, lead creation, quote snapshots, private artwork storage, audit records, and future channel contracts. Gemini is optional and server-side only; if `GEMINI_API_KEY` is absent, a transparent safe fallback responds without fabricating prices. All prices shown to customers come from configured `assistant_products` rows and the `server/services/pricingEngine.js` calculation.
+
+### Admin first-run checklist
+
+1. Sign in at `/admin/assistant`.
+2. Enter actual base and engraving prices for each product. Product names are seeded, but no fictional prices are supplied.
+3. Set the tax rate directly in the `tenant_settings` table or through the future settings controls.
+4. Add `GEMINI_API_KEY` to enable the Gemini conversational assistant. Obtain it from [Google AI Studio](https://aistudio.google.com/app/apikey).
+5. Configure the existing SMTP variables to enable owner notifications and customer/follow-up email.
+6. Verify a quote end to end on `/dw-laser.html` before promoting the widget to the public DW Laser website.
+
+### Assistant API
+
+- `GET /api/assistant/products` — public active product catalog, without prices.
+- `POST /api/assistant/conversation` — start a website conversation.
+- `POST /api/assistant/message` — send a message through Gemini or the safe fallback.
+- `POST /api/assistant/quote/calculate` — server-side estimate calculation.
+- `POST /api/assistant/quote/submit` — create customer, lead, and quote snapshot.
+- `POST /api/assistant/artwork` — securely store PNG/JPG/PDF/SVG artwork privately.
+- `GET /api/assistant/admin/summary` and `/admin/leads` — protected operational data.
+- `PATCH /api/assistant/admin/products/:id` — protected approved-pricing update.
+- `POST /api/assistant/admin/leads/:id/order` — protected lead-to-order conversion.
+- `POST /api/assistant/webhooks/:channel` — reserved, intentionally unconfigured future-channel contract.
+
+### Database schema
+
+New tables are initialized by `server/db.js`: `tenants`, `tenant_settings`, `assistant_products`, `assistant_customers`, `assistant_leads`, `assistant_conversations`, `assistant_messages`, `assistant_artwork`, `assistant_quotes`, `assistant_followups`, `assistant_orders`, and `assistant_audit_logs`. Every assistant-owned record includes `tenant_id`; version 1 seeds only the `dw-laser` tenant.
+
+### Security and business rules
+
+Admin routes use the existing authenticated session and same-origin mutation header. Public routes are rate-limited and validate input. Artwork is stored under `data/private-artwork` and is never served by the public `/uploads` mount. The AI cannot write arbitrary records, set prices, approve discounts, or promise production deadlines. Estimates are stored with a pricing snapshot and are always labeled as estimates pending Diedrich’s confirmation.
+
+### Deferred integrations
+
+WhatsApp Business, Facebook Messenger, Instagram, payments, Google Calendar, CRM/accounting systems, and multi-tenant owner administration remain intentionally unconfigured. Their channel-aware tables and API boundary are present, but no integration is claimed to be active without credentials and webhook verification.
+
 An AI-assisted lead capture and follow-up system, built as a reusable
 module inside this same backend. **Phase 1** (this build): lead form → AI
 qualification → dashboard → email confirmation/notification → automated
