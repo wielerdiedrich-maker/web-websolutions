@@ -10,6 +10,7 @@ const db = require('../db');
 const { requireAuth, requireSameOriginHeader } = require('../auth');
 const { calculatePrice, saveQuote } = require('../services/pricingEngine');
 const { reply } = require('../services/assistantAI');
+const { sendEmail } = require('../services/email');
 
 const router = express.Router();
 const TENANT = 'dw-laser';
@@ -48,7 +49,7 @@ router.post('/message', quoteLimiter, async (req,res) => {
 router.post('/quote/calculate', quoteLimiter, (req,res) => {
   try { const result=calculatePrice({ tenantId:TENANT, ...req.body }); res.json(result); } catch (err) { res.status(400).json({ error:err.message }); }
 });
-router.post('/quote/submit', quoteLimiter, (req,res) => {
+router.post('/quote/submit', quoteLimiter, async (req,res) => {
   const b=req.body||{}; if (!b.name || (!b.email && !b.phone) || !b.productId || !b.quantity) return res.status(400).json({ error:'Name, email or phone, product, and quantity are required.' });
   const email=String(b.email||'').trim().slice(0,254); if (email && !/^\S+@\S+\.\S+$/.test(email)) return res.status(400).json({error:'Enter a valid email address.'});
   const product=db.prepare('SELECT * FROM assistant_products WHERE id=? AND tenant_id=?').get(b.productId,TENANT); if(!product) return res.status(400).json({error:'Choose a valid product.'});
@@ -65,7 +66,16 @@ router.post('/quote/submit', quoteLimiter, (req,res) => {
     delays.slice(0,3).forEach((days,index)=>insert.run(uuidv4(),TENANT,leadId,new Date(Date.now()+days*86400000).toISOString().replace('T',' ').slice(0,19),String(templates[index+1]||templates[0]||'Just checking in on your DW Laser request.')));
   }
   if (b.conversationId) db.prepare('UPDATE assistant_conversations SET lead_id=?, customer_id=? WHERE id=? AND tenant_id=?').run(leadId,customerId,b.conversationId,TENANT);
-  log('lead_created','lead',leadId,qualification.status); if (qualification.status==='HOT'||qualification.status==='ORDER_READY') log('hot_lead_requires_notification','lead',leadId,'Configure SMTP to send email notification.');
+  log('lead_created','lead',leadId,qualification.status);
+  if (qualification.status==='HOT'||qualification.status==='ORDER_READY') {
+    const recipient=followupSettings.notification_email || process.env.OWNER_NOTIFICATION_EMAIL;
+    if (recipient) {
+      const notification=await sendEmail({ to:recipient, subject:`NEW HOT LEAD — ${b.name} (${product.product_name})`, text:[
+        'NEW HOT LEAD','',`Customer: ${b.name}`,`Product: ${product.product_name}`,`Quantity: ${b.quantity}`,`Deadline: ${b.deadline || '(not provided)'}`,`Estimated value: $${quote.estimatedTotal.toFixed(2)}`,`Contact: ${email || b.phone}`,'',`Open dashboard: ${req.protocol}://${req.get('host')}/admin/assistant`,
+      ].join('\n'), fromName:'DW Laser', fromEmail:process.env.SMTP_FROM });
+      log(notification.sent?'hot_lead_notification_sent':'hot_lead_notification_failed','lead',leadId,notification.reason || '');
+    } else log('hot_lead_notification_skipped','lead',leadId,'No notification email configured.');
+  }
   res.status(201).json({ leadId, quoteId, status:qualification.status, score:qualification.score, quote:{...quote, disclaimer} });
 });
 router.post('/artwork', quoteLimiter, upload.single('artwork'), async (req,res) => {
